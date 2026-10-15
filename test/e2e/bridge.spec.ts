@@ -159,6 +159,14 @@ test("one tab per client, list_changed on tab switch and app focus, origin-bound
   expect(tools.map((t) => t.name)).toContain("todo_list");
   expect(tools.find((t) => t.name === "todo_list")?.annotations).toEqual({ readOnlyHint: true, openWorldHint: true });
 
+  // A page that returns MCP content (an image) reaches the client unchanged.
+  result = await client.callTool({ name: "demo_image", arguments: {} });
+  expect(result.isError).toBeFalsy();
+  expect(result.content).toEqual([
+    { type: "text", text: "1x1 red pixel" },
+    expect.objectContaining({ type: "image", mimeType: "image/png", data: expect.stringMatching(/^iVBOR/) }),
+  ]);
+
   // Haven-style errors arrive as isError with the payload as structuredContent.
   result = await client.callTool({ name: "demo_locked", arguments: {} });
   expect(result.isError).toBe(true);

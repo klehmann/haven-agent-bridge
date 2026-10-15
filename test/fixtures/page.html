@@ -39,6 +39,22 @@
             },
           },
           {
+            name: "demo_image",
+            description: "Returns an image as MCP content, like a rendered sketch.",
+            inputSchema: { type: "object", properties: {} },
+            annotations: { readOnlyHint: true },
+            execute: async () => ({
+              content: [
+                { type: "text", text: "1x1 red pixel" },
+                {
+                  type: "image",
+                  mimeType: "image/png",
+                  data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+                },
+              ],
+            }),
+          },
+          {
             name: "demo_locked",
             description: "Fails like Haven does when it is locked.",
             inputSchema: { type: "object", properties: {} },
