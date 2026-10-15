@@ -44,6 +44,8 @@ import {
   type Target,
 } from "./protocol.js";
 import {
+  bindingFor,
+  checkBinding,
   describeSelection,
   isSelection,
   resolveTarget,
@@ -53,6 +55,7 @@ import {
   toErrorResult,
   toMcpTool,
   toolsSignature,
+  type Binding,
   type McpTool,
 } from "./targets.js";
 
@@ -92,13 +95,21 @@ type Session = {
   createdAt: number;
   lastSeenAt: number;
   lastListedSignature?: string;
+  /**
+   * The tab, document and tool definitions of the last tool list this client
+   * received; `undefined` until it lists, `null` if no tab was connected then.
+   */
+  binding?: Binding | null;
   lastNotifiedSignature?: string;
   notifyTimer?: ReturnType<typeof setTimeout>;
 };
 
+/** `fromBridge`: the bridge's own message (no page content), safe to log. */
+type CallOutcome = { ok: true; result: unknown } | { ok: false; error: string; fromBridge?: boolean };
+
 type PendingCall = {
   tabId: number;
-  resolve: (outcome: { ok: true; result: unknown } | { ok: false; error: string }) => void;
+  resolve: (outcome: CallOutcome) => void;
   timer: ReturnType<typeof setTimeout>;
 };
 
@@ -114,6 +125,8 @@ export type DaemonOptions = {
 
 export class BridgeDaemon {
   readonly token = loadOrCreateToken();
+  /** Changes with every daemon start; lets the shim notice a restart. */
+  readonly instance = randomUUID();
   settings: BridgeSettings = loadSettings();
   port = 0;
   private http: HttpServer | null = null;
@@ -252,6 +265,7 @@ export class BridgeDaemon {
         protocol: PROTOCOL_VERSION,
         port: this.port,
         token: this.token,
+        instance: this.instance,
       });
     }
     if (path === "/" || path === "/ui" || path === "/ui/") {
@@ -346,7 +360,11 @@ export class BridgeDaemon {
       // fail calls that were waiting for an answer.
       for (const [callId, call] of this.pending) {
         clearTimeout(call.timer);
-        call.resolve({ ok: false, error: "The browser extension disconnected before the tab answered." });
+        call.resolve({
+          ok: false,
+          error: "The browser extension disconnected before the tab answered; the call may or may not have run. Check the state before retrying.",
+          fromBridge: true,
+        });
         this.pending.delete(callId);
       }
       this.pushState();
@@ -383,7 +401,11 @@ export class BridgeDaemon {
         if (!call) return;
         clearTimeout(call.timer);
         this.pending.delete(msg.callId);
-        call.resolve(msg.ok ? { ok: true, result: msg.result } : { ok: false, error: String(msg.error) });
+        call.resolve(
+          msg.ok
+            ? { ok: true, result: msg.result }
+            : { ok: false, error: String(msg.error), fromBridge: msg.fromBridge === true },
+        );
         return;
       }
       case "set_default_selection":
@@ -441,21 +463,37 @@ export class BridgeDaemon {
     target: Target,
     name: string,
     args: Record<string, unknown>,
-  ): Promise<{ ok: true; result: unknown } | { ok: false; error: string }> {
+  ): Promise<CallOutcome> {
     if (!this.extension) {
       await waitFor(() => this.extension !== null, EXTENSION_WAIT_MS);
     }
     if (!this.extension) {
-      return { ok: false, error: "The browser extension is not connected. Is Chrome running with Haven Agent Bridge?" };
+      return {
+        ok: false,
+        error: "The browser extension is not connected. Is Chrome running with Haven Agent Bridge?",
+        fromBridge: true,
+      };
     }
     const callId = randomUUID();
     return new Promise((resolve) => {
       const timer = setTimeout(() => {
         this.pending.delete(callId);
-        resolve({ ok: false, error: `The tab did not answer within ${Math.round(this.settings.callTimeoutMs / 1000)} s.` });
+        resolve({
+          ok: false,
+          error: `The tab did not answer within ${Math.round(this.settings.callTimeoutMs / 1000)} s. The call may still complete in the page; check the state before retrying.`,
+          fromBridge: true,
+        });
       }, this.settings.callTimeoutMs);
       this.pending.set(callId, { tabId: target.tabId, resolve, timer });
-      this.sendToExtension({ type: "call", callId, tabId: target.tabId, origin: target.origin, name, args });
+      this.sendToExtension({
+        type: "call",
+        callId,
+        tabId: target.tabId,
+        origin: target.origin,
+        ...(target.documentId ? { documentId: target.documentId } : {}),
+        name,
+        args,
+      });
     });
   }
 
@@ -567,6 +605,7 @@ export class BridgeDaemon {
       const target = this.targetOf(session);
       const tools = this.toolsFor(target);
       session.lastListedSignature = toolsSignature(target, this.metaToolNames());
+      session.binding = target ? bindingFor(target) : null;
       this.log.add({
         kind: "tools_list",
         status: "info",
@@ -695,11 +734,29 @@ export class BridgeDaemon {
     explicitTarget?: Target,
   ): Promise<ReturnType<typeof toCallResult> | ReturnType<typeof toErrorResult>> {
     const client = session ? this.clientName(session) : GUI_CLIENT;
-    const target = explicitTarget ?? this.targetOf(session);
-
     if (!explicitTarget && this.metaToolNames().includes(name)) {
-      return this.runMetaTool(session, name, args, target);
+      return this.runMetaTool(session, name, args, this.targetOf(session));
     }
+
+    // A client that listed its tools calls into exactly that tab, document and
+    // tool definition, even if the user has switched tabs since; anything else
+    // is refused and the client is told to list again.
+    if (!explicitTarget && session && session.binding !== undefined) {
+      const check = session.binding
+        ? checkBinding(this.targets, session.binding, name)
+        : { ok: false as const, message: "No browser tab was connected when you listed the tools." };
+      if (!check.ok) {
+        this.scheduleListChanged(session);
+        return this.refuse(session, name, args, {
+          error: "STATE_CHANGED",
+          message: check.message,
+          requiredAction: "call tools/list again (bridge_tools_list if your client does not refresh its tools), then retry only if the call still makes sense",
+        });
+      }
+      return this.dispatch(session, client, check.target, name, args);
+    }
+
+    const target = explicitTarget ?? this.targetOf(session);
     if (!target) {
       return toErrorResult(
         this.targets.length === 0
@@ -717,6 +774,37 @@ export class BridgeDaemon {
       );
     }
 
+    return this.dispatch(session, client, target, name, args);
+  }
+
+  /** A call the bridge itself turns down; logged like a call so it shows in the GUI. */
+  private refuse(
+    session: Session,
+    name: string,
+    args: Record<string, unknown>,
+    payload: { error: string; message: string; requiredAction?: string },
+  ) {
+    const binding = session.binding;
+    const result = toErrorResult(JSON.stringify(payload));
+    const finish = this.log.startCall({
+      sessionId: session.id,
+      client: this.clientName(session),
+      origin: binding?.origin ?? "",
+      tabId: binding?.tabId ?? -1,
+      tool: name,
+      args,
+    });
+    finish({ ok: false, error: JSON.stringify(payload), bytes: Buffer.byteLength(safeJson(result)), fromBridge: true });
+    return result;
+  }
+
+  private async dispatch(
+    session: Session | null,
+    client: string,
+    target: Target,
+    name: string,
+    args: Record<string, unknown>,
+  ) {
     const finish = this.log.startCall({
       sessionId: session?.id,
       client,
@@ -731,7 +819,11 @@ export class BridgeDaemon {
     if (outcome.ok && !("isError" in result && result.isError)) {
       finish({ ok: true, result: outcome.result, bytes });
     } else {
-      finish({ ok: false, error: outcome.ok ? safeJson(outcome.result) : outcome.error, bytes });
+      finish(
+        outcome.ok
+          ? { ok: false, error: safeJson(outcome.result), bytes }
+          : { ok: false, error: outcome.error, bytes, fromBridge: outcome.fromBridge },
+      );
     }
     return result;
   }
@@ -763,6 +855,7 @@ export class BridgeDaemon {
           tabs: this.targets.map((t) => ({ ...summary(t), toolNames: t.tools.map((tool) => tool.name) })),
         });
       case META_TOOLS:
+        if (session) session.binding = target ? bindingFor(target) : null;
         return toCallResult({
           tab: target ? summary(target) : null,
           tools: target ? target.tools.map((t) => toMcpTool(t, target.origin)) : [],

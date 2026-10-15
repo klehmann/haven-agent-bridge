@@ -40,6 +40,8 @@ export type Target = {
   generation: number;
   /** When the user last activated this tab (ms); 0 if never seen active. */
   lastActiveAt: number;
+  /** Chrome's id of the document in the tab; changes on every reload or navigation. */
+  documentId?: string;
   /** Whether the page has WebMCP natively or got the extension's polyfill. */
   native: boolean;
   tools: WebMcpTool[];
@@ -57,7 +59,7 @@ export type HelloMessage = { type: "hello"; protocol: number; extensionVersion: 
 export type TargetsMessage = { type: "targets"; targets: Target[] };
 export type ToolResultMessage =
   | { type: "tool_result"; callId: string; ok: true; result: unknown }
-  | { type: "tool_result"; callId: string; ok: false; error: string };
+  | { type: "tool_result"; callId: string; ok: false; error: string; fromBridge?: boolean };
 export type SetDefaultSelectionMessage = { type: "set_default_selection"; selection: Selection };
 export type SetRecordingMessage = { type: "set_recording"; recording: boolean };
 export type PongMessage = { type: "pong" };
@@ -77,6 +79,8 @@ export type CallMessage = {
   callId: string;
   tabId: number;
   origin: string;
+  /** The document the client listed its tools from; a reloaded page gets a new one. */
+  documentId?: string;
   name: string;
   args: Record<string, unknown>;
 };

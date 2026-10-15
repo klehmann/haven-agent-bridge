@@ -19,6 +19,8 @@ What it does differently from [webmcp-bridge](https://github.com/nathan-gage/web
 - **One tab per client, no duplicates.** A client sees the tools of exactly one tab, under their original names. Two Haven tabs no longer show every `haven_*` tool twice.
 - **Bound to tab and origin.** You choose the tab in the extension popup or the GUI: the tab you used last (default), any tab of one origin, or one pinned tab. A call names the tab and the origin it expects; if the tab has navigated elsewhere, the call fails instead of running there.
 - **Allowlist instead of `<all_urls>`.** Content scripts run only on allowed sites (default: `http://localhost:4174`, `https://haven.mindoodb.com`, `https://mindoodb-haven-develop.pages.dev`). Add more in the popup.
+- **Calls go where the client looked.** A client's calls run in the tab, page document and tool definition of its last `tools/list`, even if you switch tabs in between. If that tab closed, reloaded or navigated, or the tool changed, the call is refused with `STATE_CHANGED` and the client is told to list again.
+- **No blind retries.** If the connection breaks while a call is in flight, the client gets an error saying the call may or may not have run. The shim only re-sends what certainly never arrived (connection refused, unknown session after a daemon restart) or what is harmless to repeat (`tools/list`, `ping`).
 - **Dynamic tools.** When the page re-registers its tools (Haven focusing another app, switching agent tools on or off) or you switch tabs, every affected client gets `notifications/tools/list_changed`.
 - **Faithful to the page.** `AbortSignal` unregistration works; `readOnlyHint` → `readOnlyHint`, `consequentialHint` → `destructiveHint`, `untrustedContentHint` → `openWorldHint`; Haven's JSON errors (`{ error, message, requiredAction }`) also arrive as `structuredContent`.
 - **Several clients at once.** One daemon holds the browser connection; every stdio client gets a small shim that starts the daemon when needed.
@@ -74,11 +76,13 @@ Open it from the popup (*Debug GUI*) or with `node dist/cli.js ui`.
 - **Statistics:** per tool and per client since the start or the last *Clear*.
 - **Export:** JSON (log, statistics, tabs, clients) or NDJSON (log only); *Redact* replaces arguments, responses and errors with their length.
 
-*Record payloads* is off by default: calls are then logged with timing and errors but without arguments and responses, which carry user data. Everything stays on this machine; with `logFile: true` in the settings the log is also appended to `~/.haven-agent-bridge/calls.ndjson`.
+*Record payloads* is off by default: calls are then logged with timing but without arguments, responses or the page's error text, which can carry user data; only an error code such as `LOCKED` is kept (the bridge's own messages, like a refused call, are kept in full). Everything stays on this machine; with `logFile: true` in the settings the log is also appended to `~/.haven-agent-bridge/calls.ndjson`.
 
 *Fallback tools* adds `bridge_tools_list` and `bridge_tool_call` for clients that ignore `list_changed`. Goose (since 2026-08) and Claude Code re-read their tools on `list_changed`.
 
 ## Security
+
+The annotation mapping only gives the client hints; it enforces nothing. Approval and authorization stay in the page: Haven asks the user before a `consequentialHint` tool runs and checks its lock state itself.
 
 - Daemon on `127.0.0.1` only; `Host` must be `127.0.0.1:<port>` or `localhost:<port>` (DNS rebinding).
 - A 256-bit token guards `/mcp`, `/api` and the extension's WebSocket; files in `~/.haven-agent-bridge` are `0600`, the folder `0700`.

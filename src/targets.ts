@@ -4,6 +4,55 @@
  */
 import type { Selection, Target, WebMcpTool } from "./protocol.js";
 
+/**
+ * What a client saw in its last tool list: the tab, the document in it, and
+ * each tool's definition. Calls go there and only there.
+ */
+export type Binding = {
+  tabId: number;
+  origin: string;
+  documentId?: string;
+  tools: Map<string, string>;
+};
+
+export function bindingFor(target: Target): Binding {
+  return {
+    tabId: target.tabId,
+    origin: target.origin,
+    documentId: target.documentId,
+    tools: new Map(target.tools.map((t) => [t.name, toolHash(t)])),
+  };
+}
+
+/**
+ * The tab a call from a client bound to `binding` may run in, or why not.
+ * The selection may point elsewhere by now (the user switched tabs); the call
+ * still goes to the tab, document and tool definition the client listed, or
+ * is refused.
+ */
+export function checkBinding(
+  targets: Target[],
+  binding: Binding,
+  name: string,
+): { ok: true; target: Target } | { ok: false; message: string } {
+  const listed = binding.tools.get(name);
+  if (listed === undefined) {
+    return { ok: false, message: `"${name}" was not in the tool list you received.` };
+  }
+  const target = targets.find((t) => t.tabId === binding.tabId);
+  if (!target || target.origin !== binding.origin) {
+    return { ok: false, message: `The tab you listed tools from (${binding.origin}) was closed or navigated away.` };
+  }
+  if (binding.documentId && target.documentId !== binding.documentId) {
+    return { ok: false, message: `The page you listed tools from (${binding.origin}) was reloaded since then.` };
+  }
+  const tool = target.tools.find((t) => t.name === name);
+  if (!tool || toolHash(tool) !== listed) {
+    return { ok: false, message: `"${name}" changed or was removed in ${binding.origin} since you listed it.` };
+  }
+  return { ok: true, target };
+}
+
 /** The tab a selection resolves to right now, or `null`. */
 export function resolveTarget(targets: Target[], selection: Selection): Target | null {
   switch (selection.mode) {
@@ -161,10 +210,15 @@ export function safeJson(value: unknown): string {
   }
 }
 
+/** Fingerprint of one tool definition: a call must match the definition the client saw. */
+export function toolHash(tool: WebMcpTool): string {
+  return safeJson([tool.name, tool.description, tool.inputSchema, tool.annotations ?? null]);
+}
+
 /** Stable fingerprint of what `tools/list` would return; changes trigger list_changed. */
 export function toolsSignature(target: Target | null, extraNames: string[]): string {
   return safeJson({
-    tab: target ? [target.tabId, target.origin] : null,
+    tab: target ? [target.tabId, target.origin, target.documentId ?? null] : null,
     tools: target?.tools ?? [],
     extra: extraNames,
   });

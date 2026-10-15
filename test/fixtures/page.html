@@ -29,6 +29,16 @@
             },
           },
           {
+            name: "demo_slow",
+            description: "Counts a write after a delay (for connection-loss tests).",
+            inputSchema: { type: "object", properties: { ms: { type: "number" } } },
+            execute: async (input) => {
+              await new Promise((r) => setTimeout(r, input.ms || 1500));
+              window.writes = (window.writes || 0) + 1;
+              return { writes: window.writes };
+            },
+          },
+          {
             name: "demo_locked",
             description: "Fails like Haven does when it is locked.",
             inputSchema: { type: "object", properties: {} },

@@ -15,7 +15,7 @@ const SCRIPT_IDS = ["hab-isolated", "hab-main"];
 const RECONNECT_MIN_MS = 1000;
 const RECONNECT_MAX_MS = 10000;
 
-/** tabId -> target (see src/protocol.ts `Target`) plus `documentId` */
+/** tabId -> target (see src/protocol.ts `Target`) */
 const targets = new Map();
 let origins = [...DEFAULT_ORIGINS];
 let ws = null;
@@ -112,7 +112,7 @@ function targetsChanged() {
 }
 
 function snapshot() {
-  return [...targets.values()].map(({ documentId, ...t }) => t);
+  return [...targets.values()];
 }
 
 function touch(tabId) {
@@ -132,7 +132,7 @@ chrome.windows.onFocusChanged.addListener(async (windowId) => {
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   if (targets.delete(tabId)) {
-    failPending(tabId, "The tab was closed during the call.");
+    failPending(tabId, "The tab was closed before it answered; the call may or may not have run.");
     targetsChanged();
   }
 });
@@ -143,7 +143,7 @@ chrome.tabs.onUpdated.addListener((tabId, change) => {
   if (change.url && originOf(change.url) !== t.origin) {
     // Navigated away; the next page announces itself if its origin is allowed.
     targets.delete(tabId);
-    failPending(tabId, "The tab navigated to another site during the call.");
+    failPending(tabId, "The tab navigated away before it answered; the call may or may not have run.");
     targetsChanged();
     return;
   }
@@ -190,7 +190,7 @@ function onPageMessage(message, sender) {
       tools: sanitizeTools(message.tools),
       documentId: sender.documentId,
     });
-    if (previous && !sameDocument) failPending(tab.id, "The page reloaded during the call.");
+    if (previous && !sameDocument) failPending(tab.id, "The page reloaded before it answered; the call may or may not have run.");
     targetsChanged();
   } else if (message.type === "tool-result") {
     pending.delete(message.callId);
@@ -203,7 +203,7 @@ function onPageMessage(message, sender) {
     const t = targets.get(tab.id);
     if (t && t.documentId === sender.documentId) {
       targets.delete(tab.id);
-      failPending(tab.id, "The page was closed or reloaded during the call.");
+      failPending(tab.id, "The page was closed or reloaded before it answered; the call may or may not have run.");
       targetsChanged();
     }
   }
@@ -235,17 +235,20 @@ function failPending(tabId, error) {
   for (const [callId, callTab] of pending) {
     if (callTab !== tabId) continue;
     pending.delete(callId);
-    send({ type: "tool_result", callId, ok: false, error });
+    send({ type: "tool_result", callId, ok: false, error, fromBridge: true });
   }
 }
 
 async function runCall(msg) {
   await ready;
   const t = targets.get(msg.tabId);
-  const fail = (error) => send({ type: "tool_result", callId: msg.callId, ok: false, error });
-  if (!t) return fail("The selected tab is gone (closed or navigated away).");
+  const fail = (error) => send({ type: "tool_result", callId: msg.callId, ok: false, error, fromBridge: true });
+  if (!t) return fail("The tab is gone (closed or navigated away); the call was not run.");
   if (t.origin !== msg.origin) return fail(`The tab now shows ${t.origin}, not ${msg.origin}; the call was not run.`);
-  if (!t.tools.some((tool) => tool.name === msg.name)) return fail(`The tab has no tool "${msg.name}" (any more).`);
+  if (msg.documentId && t.documentId !== msg.documentId) {
+    return fail("The page in the tab was reloaded since the tools were listed; the call was not run.");
+  }
+  if (!t.tools.some((tool) => tool.name === msg.name)) return fail(`The tab has no tool "${msg.name}" (any more); the call was not run.`);
   pending.set(msg.callId, t.tabId);
   try {
     await chrome.tabs.sendMessage(
@@ -254,7 +257,7 @@ async function runCall(msg) {
       t.documentId ? { documentId: t.documentId } : { frameId: 0 },
     );
   } catch (error) {
-    if (pending.delete(msg.callId)) fail(`Could not reach the tab: ${error && error.message ? error.message : error}`);
+    if (pending.delete(msg.callId)) fail(`Could not reach the tab, the call was not run: ${error && error.message ? error.message : error}`);
   }
 }
 

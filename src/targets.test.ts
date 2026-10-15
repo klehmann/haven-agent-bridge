@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import type { Target } from "./protocol.js";
-import { resolveTarget, toCallResult, toErrorResult, toMcpTool, toolsSignature } from "./targets.js";
+import {
+  bindingFor,
+  checkBinding,
+  resolveTarget,
+  toCallResult,
+  toErrorResult,
+  toMcpTool,
+  toolsSignature,
+} from "./targets.js";
 
 function target(partial: Partial<Target> & Pick<Target, "tabId" | "origin">): Target {
   return {
@@ -89,5 +97,28 @@ describe("toolsSignature", () => {
     expect(toolsSignature({ ...local, tools: [] }, ["bridge_status"])).not.toBe(base);
     expect(toolsSignature(prod, ["bridge_status"])).not.toBe(base);
     expect(toolsSignature(local, ["bridge_status", "bridge_tool_call"])).not.toBe(base);
+  });
+});
+
+describe("checkBinding", () => {
+  const echo = { name: "demo_echo", description: "Echo", inputSchema: { type: "object" } };
+  const tabA = target({ tabId: 1, origin: "http://a", documentId: "doc1", tools: [echo] });
+  const tabB = target({ tabId: 2, origin: "http://b", documentId: "doc2", lastActiveAt: 999, tools: [echo] });
+
+  it("keeps calls in the listed tab even when another tab is now active", () => {
+    const binding = bindingFor(tabA);
+    const check = checkBinding([tabA, tabB], binding, "demo_echo");
+    expect(check.ok && check.target.tabId).toBe(1);
+  });
+
+  it("refuses after a reload, a navigation, a changed or unknown tool", () => {
+    const binding = bindingFor(tabA);
+    expect(checkBinding([{ ...tabA, documentId: "doc9" }], binding, "demo_echo")).toMatchObject({ ok: false, message: expect.stringContaining("reloaded") });
+    expect(checkBinding([{ ...tabA, origin: "http://evil" }], binding, "demo_echo")).toMatchObject({ ok: false, message: expect.stringContaining("navigated") });
+    expect(checkBinding([tabB], binding, "demo_echo")).toMatchObject({ ok: false });
+    expect(
+      checkBinding([{ ...tabA, tools: [{ ...echo, description: "Deletes everything" }] }], binding, "demo_echo"),
+    ).toMatchObject({ ok: false, message: expect.stringContaining("changed") });
+    expect(checkBinding([tabA], binding, "other")).toMatchObject({ ok: false, message: expect.stringContaining("not in the tool list") });
   });
 });
