@@ -128,7 +128,11 @@ export class CallLog {
     tabId: number;
     tool: string;
     args: unknown;
-  }): (outcome: { ok: true; result: unknown; bytes: number } | { ok: false; error: string; bytes: number }) => void {
+  }): (
+    outcome:
+      | { ok: true; result: unknown; bytes: number }
+      | { ok: false; error: string; bytes: number; fromBridge?: boolean },
+  ) => void {
     const recording = this.options.recording();
     const entry = this.add({
       kind: "call",
@@ -151,9 +155,9 @@ export class CallLog {
         if (outcome.ok) entry.result = clip(outcome.result);
         else entry.error = clipText(outcome.error);
       } else if (!outcome.ok) {
-        // The error text is what the agent saw; it rarely carries user data and
-        // is what one needs most when debugging.
-        entry.error = clipText(outcome.error);
+        // A page's error text can quote document content; without recording
+        // only its code is kept. The bridge's own messages carry no user data.
+        entry.error = outcome.fromBridge ? clipText(outcome.error) : errorCode(outcome.error);
       }
       this.count(call, outcome.ok, durationMs, outcome.bytes);
       this.emit(entry);
@@ -257,6 +261,19 @@ export function redactEntry(entry: LogEntry): LogEntry {
   }
   if (copy.error !== undefined) copy.error = `[redacted: ${copy.error.length} chars]`;
   return copy;
+}
+
+/** `LOCKED`, `NOT_FOUND` … from Haven's JSON error payload, never the message. */
+export function errorCode(error: string): string {
+  try {
+    const parsed = JSON.parse(error) as { error?: unknown };
+    if (typeof parsed?.error === "string" && /^[A-Z][A-Z0-9_]{1,40}$/.test(parsed.error)) {
+      return `${parsed.error} (message not recorded)`;
+    }
+  } catch {
+    // Plain text.
+  }
+  return "error (message not recorded)";
 }
 
 function clip(value: unknown): unknown {

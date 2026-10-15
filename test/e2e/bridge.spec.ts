@@ -4,7 +4,7 @@
  * over Streamable HTTP and over the stdio shim.
  */
 import { spawn, type ChildProcess } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -17,8 +17,18 @@ import { ToolListChangedNotificationSchema } from "@modelcontextprotocol/sdk/typ
 import { chromium, expect, test, type BrowserContext, type Page, type Worker } from "@playwright/test";
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
-const EXTENSION = join(ROOT, "extension");
 const HOME = mkdtempSync(join(tmpdir(), "hab-e2e-"));
+// A copy of the extension that only looks at a test port, so the tests never
+// touch a bridge the developer is running on 13300-13309 at the same time.
+const TEST_PORT = 13390;
+const EXTENSION = join(HOME, "extension");
+cpSync(join(ROOT, "extension"), EXTENSION, { recursive: true });
+writeFileSync(
+  join(EXTENSION, "background.js"),
+  readFileSync(join(EXTENSION, "background.js"), "utf8")
+    .replace(/const PORT_FIRST = \d+;/, `const PORT_FIRST = ${TEST_PORT};`)
+    .replace(/const PORT_LAST = \d+;/, `const PORT_LAST = ${TEST_PORT};`),
+);
 const ORIGIN_A = "http://127.0.0.1:4601";
 const ORIGIN_B = "http://localhost:4602";
 
@@ -86,7 +96,7 @@ async function openPage(url: string): Promise<Page> {
 
 test.beforeAll(async () => {
   servers = [await serve(4601, "127.0.0.1"), await serve(4602, "127.0.0.1")];
-  daemon = spawn(process.execPath, [join(ROOT, "dist/cli.js"), "daemon", "--record", "--quiet"], {
+  daemon = spawn(process.execPath, [join(ROOT, "dist/cli.js"), "daemon", "--record", "--quiet", "--port", String(TEST_PORT)], {
     env: { ...process.env, HAVEN_AGENT_BRIDGE_HOME: HOME },
     stdio: "inherit",
   });
@@ -167,10 +177,53 @@ test("one tab per client, list_changed on tab switch and app focus, origin-bound
   await waitFor(async () => (await state()).targets.filter((t) => t.origin === ORIGIN_B).length === 2, "tab A on origin B");
   result = await client.callTool({ name: "demo_echo", arguments: { text: "x" } });
   expect(result.isError).toBe(true);
-  expect(JSON.stringify(result.content)).toContain("No tab matches the selection");
+  expect((result.structuredContent as { error: string }).error).toBe("STATE_CHANGED");
   expect((await client.listTools()).tools.every((t) => t.name.startsWith("bridge_"))).toBe(true);
 
   await client.close();
+});
+
+test("calls stay in the tab, document and tool version the client listed", async () => {
+  const pageA = await openPage(`${ORIGIN_A}/`);
+  await waitFor(async () => (await state()).targets.find((t) => t.origin === ORIGIN_A && t.tools.length), "tab A tools");
+  const { client, changes } = await httpClient("e2e-binding");
+  expect(originOfTools((await client.listTools()).tools)).toEqual([ORIGIN_A]);
+
+  // The user switches to a tab on another origin before the agent re-lists:
+  // the agent's next call still goes to the tab it listed.
+  const pageB = await openPage(`${ORIGIN_B}/`);
+  await waitFor(() => changes.length >= 1, "list_changed after tab switch");
+  let result = await client.callTool({ name: "demo_echo", arguments: { text: "bound" } });
+  expect((result.structuredContent as { origin: string }).origin).toBe(ORIGIN_A);
+  expect(await pageB.evaluate(() => (window as any).calls.length)).toBe(0);
+
+  // After listing again it follows the switch.
+  expect(originOfTools((await client.listTools()).tools)).toEqual([ORIGIN_B]);
+  result = await client.callTool({ name: "demo_echo", arguments: { text: "b" } });
+  expect((result.structuredContent as { origin: string }).origin).toBe(ORIGIN_B);
+
+  // The listed page reloads (same origin, same tools): refused until listed again.
+  const listed = await state();
+  const tabB = listed.targets.find((t) => t.tabId === listed.defaultTabId) as { tabId: number; documentId?: string };
+  expect(tabB.documentId).toBeTruthy();
+  await pageB.reload();
+  await waitFor(async () => {
+    const t = (await state()).targets.find((x) => x.tabId === tabB.tabId) as { tools: unknown[]; documentId?: string } | undefined;
+    return t && t.tools.length && t.documentId !== tabB.documentId;
+  }, "tab B reloaded");
+  result = await client.callTool({ name: "demo_echo", arguments: { text: "stale" } });
+  expect(result.structuredContent).toMatchObject({ error: "STATE_CHANGED" });
+  expect(JSON.stringify(result.content)).toContain("reloaded");
+
+  // A tool whose definition changed after listing is refused too.
+  await client.listTools();
+  await pageB.evaluate(() => (window as any).focusApp("todo")); // same names, new set
+  await waitFor(async () => (await state()).targets.find((t) => t.tabId === tabB.tabId)?.tools.some((t) => t.name === "todo_list"), "re-registration");
+  result = await client.callTool({ name: "todo_list", arguments: {} });
+  expect(result.structuredContent).toMatchObject({ error: "STATE_CHANGED" });
+
+  await client.close();
+  await pageA.close();
 });
 
 test("stdio shim reaches the same daemon", async () => {
@@ -212,12 +265,12 @@ test("debug GUI shows tabs, tools and the call log", async () => {
   await page.screenshot({ path: join(ROOT, "test-results/gui-stats.png") });
 
   await page.getByRole("tab", { name: "Tabs & clients" }).click();
-  await expect(page.locator("#targets-body")).toContainText("127.0.0.1:4601");
+  await expect(page.locator("#targets-body")).toContainText("Bridge test page");
   await page.screenshot({ path: join(ROOT, "test-results/gui-targets.png") });
 
   await page.emulateMedia({ colorScheme: "dark" });
   await page.getByRole("tab", { name: "Calls" }).click();
-  await page.locator("#log-body tr.row", { hasText: "demo_locked" }).first().click();
+  await page.locator("#log-body tr.row", { has: page.locator(".status.error") }).first().click();
   await page.screenshot({ path: join(ROOT, "test-results/gui-calls-dark.png") });
   await page.emulateMedia({ colorScheme: "light" });
 
@@ -246,4 +299,37 @@ test("web pages cannot read the token or call the API", async () => {
   for (const line of outcome) expect(line).toMatch(/:(opaque|failed)$/);
   const direct = await fetch(`http://127.0.0.1:${port}/.well-known/haven-agent-bridge`, { headers: { origin: ORIGIN_A } });
   expect(direct.status).toBe(403);
+});
+
+test("a call in flight when the daemon dies is reported as unknown, never re-sent", async () => {
+  const page = await openPage(`${ORIGIN_A}/`);
+  await waitFor(async () => (await state()).targets.find((t) => t.origin === ORIGIN_A && t.tools.length), "tab A tools");
+  const client = new Client({ name: "e2e-crash", version: "1.0.0" });
+  await client.connect(
+    new StdioClientTransport({
+      command: process.execPath,
+      args: [join(ROOT, "dist/cli.js")],
+      env: { ...(process.env as Record<string, string>), HAVEN_AGENT_BRIDGE_HOME: HOME },
+    }),
+  );
+  await client.listTools();
+  const call = client.callTool({ name: "demo_slow", arguments: { ms: 1500 } }).then(
+    (r) => ({ ok: true as const, r }),
+    (e: Error) => ({ ok: false as const, message: e.message }),
+  );
+  await new Promise((r) => setTimeout(r, 300));
+  daemon.kill("SIGKILL");
+  const outcome = await call;
+  expect(outcome.ok).toBe(false);
+  expect(outcome.ok ? "" : outcome.message).toContain("may or may not have run");
+  await new Promise((r) => setTimeout(r, 2000));
+  // The page ran it once; nothing was replayed.
+  expect(await page.evaluate(() => (window as any).writes)).toBe(1);
+  await client.close();
+  // The shim may have started a replacement daemon; stop it.
+  try {
+    process.kill(Number(readFileSync(join(HOME, "daemon.lock"), "utf8")), "SIGTERM");
+  } catch {
+    // none started
+  }
 });

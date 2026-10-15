@@ -13,7 +13,7 @@
         <div class="logo">
           <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" class="logo-bg" /><path d="M9 11h6v10H9zM17 11h6v10h-6z" fill="white" opacity=".92" /><path d="M15 16h2" stroke="white" stroke-width="2" /></svg>
           <div>
-            <strong>Agent Bridge</strong>
+            <strong>Haven Agent Bridge</strong>
             <span id="version" class="muted small"></span>
           </div>
         </div>
@@ -36,11 +36,19 @@
           </button>
         </nav>
         <div class="side-settings">
-          <label class="switch" title="Keep arguments and responses of calls in the log">
-            <input type="checkbox" id="recording" /><span class="track"></span><span>Record payloads</span>
+          <label class="switch">
+            <input type="checkbox" id="recording" aria-describedby="recording-help" /><span class="track"></span>
+            <span class="switch-text">
+              <span>Record payloads</span>
+              <small id="recording-help">Keeps arguments, responses and error texts in the log. Off: only timing and error codes, since payloads can contain personal data.</small>
+            </span>
           </label>
-          <label class="switch" title="Offer bridge_tools_list and bridge_tool_call for clients that ignore list_changed">
-            <input type="checkbox" id="fallback" /><span class="track"></span><span>Fallback tools</span>
+          <label class="switch">
+            <input type="checkbox" id="fallback" aria-describedby="fallback-help" /><span class="track"></span>
+            <span class="switch-text">
+              <span>Fallback tools</span>
+              <small id="fallback-help">For MCP clients that keep their first tool list and ignore tab or app changes: adds <code>bridge_tools_list</code> and <code>bridge_tool_call</code>, so the agent can list and run the current tab's tools itself. Goose and Claude Code don't need it.</small>
+            </span>
           </label>
         </div>
         <div class="side-export">
