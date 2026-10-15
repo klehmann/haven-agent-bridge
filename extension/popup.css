@@ -1,0 +1,122 @@
+:root {
+  color-scheme: light dark;
+  --fg: #1f2328;
+  --muted: #656d76;
+  --line: #d0d7de;
+  --accent: #2563eb;
+  --bg: #fff;
+  --error: #b91c1c;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --line: #3d444d;
+    --accent: #60a5fa;
+    --bg: #0d1117;
+    --error: #f87171;
+  }
+}
+body {
+  width: 360px;
+  margin: 0;
+  padding: 12px 14px;
+  font: 13px/1.4 system-ui, -apple-system, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+}
+h1 {
+  font-size: 15px;
+  margin: 0 0 2px;
+}
+h2 {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--muted);
+}
+section {
+  border-top: 1px solid var(--line);
+  padding: 10px 0;
+}
+header {
+  padding-bottom: 8px;
+}
+.muted {
+  color: var(--muted);
+  margin: 0;
+}
+.error {
+  color: var(--error);
+  margin: 6px 0 0;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.choice {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 4px 0;
+}
+.choice input {
+  margin-top: 3px;
+}
+.choice .title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.choice .sub {
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.selected .title::after {
+  content: " ← connected";
+  color: var(--accent);
+  font-weight: 400;
+}
+ul {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0;
+  overflow-wrap: anywhere;
+}
+form {
+  display: flex;
+  gap: 6px;
+}
+input[type="url"] {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+}
+button {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+button:hover {
+  border-color: var(--accent);
+}
+.link {
+  border: none;
+  padding: 0 4px;
+  color: var(--accent);
+}

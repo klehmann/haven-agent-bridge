@@ -1,0 +1,38 @@
+{
+  "name": "haven-agent-bridge",
+  "version": "0.1.0",
+  "description": "Bridges WebMCP tools of one chosen browser tab (Haven and other allowed origins) to MCP clients such as Goose or Claude Code, with a debug GUI.",
+  "author": "Mindoo GmbH",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "haven-agent-bridge": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "ui",
+    "extension",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:e2e": "npm run build && playwright test",
+    "daemon": "node dist/cli.js daemon"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "ws": "8.22.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@types/node": "22.18.0",
+    "@types/ws": "8.18.1",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}

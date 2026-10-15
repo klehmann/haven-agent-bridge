@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Haven Agent Bridge</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Haven Agent Bridge</h1>
+      <p id="connection" class="muted">Connecting…</p>
+    </header>
+
+    <section>
+      <h2>Tools for MCP clients come from</h2>
+      <div id="targets" role="radiogroup" aria-label="Tab for MCP clients"></div>
+      <div id="silent"></div>
+    </section>
+
+    <section class="row">
+      <label><input type="checkbox" id="recording" /> Record arguments and responses</label>
+      <button id="open-ui" type="button">Debug GUI</button>
+    </section>
+
+    <section>
+      <h2>Allowed sites</h2>
+      <ul id="origins"></ul>
+      <form id="add-origin">
+        <input id="origin-input" type="url" placeholder="https://example.com" aria-label="Origin to allow" required />
+        <button type="submit">Allow</button>
+      </form>
+      <p id="origin-error" class="error" hidden></p>
+    </section>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

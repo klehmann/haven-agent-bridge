@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Haven Agent Bridge</title>
+    <link rel="stylesheet" href="/ui/style.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <h1>Haven Agent Bridge</h1>
+        <span id="status" class="chip">connecting…</span>
+      </div>
+      <div class="controls">
+        <label title="Keep arguments and responses of calls in the log"><input type="checkbox" id="recording" /> Record payloads</label>
+        <label title="Offer bridge_tools_list and bridge_tool_call for clients that ignore list_changed"><input type="checkbox" id="fallback" /> Fallback tools</label>
+        <span class="sep"></span>
+        <label><input type="checkbox" id="redact" /> Redact</label>
+        <button type="button" id="export-json">Export JSON</button>
+        <button type="button" id="export-ndjson">Export NDJSON</button>
+        <button type="button" id="clear">Clear</button>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-view="calls" aria-selected="true">Calls</button>
+      <button role="tab" data-view="tools" aria-selected="false">Tools</button>
+      <button role="tab" data-view="targets" aria-selected="false">Tabs &amp; clients</button>
+      <button role="tab" data-view="stats" aria-selected="false">Statistics</button>
+    </nav>
+
+    <main>
+      <section id="view-calls" class="view">
+        <div class="toolbar">
+          <input id="filter" type="search" placeholder="Filter by tool, client, origin, payload…" aria-label="Filter log" />
+          <label><input type="checkbox" id="show-events" checked /> Protocol events</label>
+          <label><input type="checkbox" id="errors-only" /> Errors only</label>
+          <span id="log-count" class="muted"></span>
+        </div>
+        <p id="recording-hint" class="hint" hidden>Recording is off: calls are listed with timing and errors, but without arguments and responses. Switch on “Record payloads” to keep them.</p>
+        <table class="log">
+          <thead>
+            <tr><th>Time</th><th>Kind</th><th>What</th><th>Client</th><th>Tab</th><th>Status</th><th class="num">ms</th><th class="num">Size</th></tr>
+          </thead>
+          <tbody id="log-body"></tbody>
+        </table>
+      </section>
+
+      <section id="view-tools" class="view" hidden>
+        <div class="toolbar">
+          <label>Tab <select id="tools-tab"></select></label>
+          <input id="tools-filter" type="search" placeholder="Filter tools…" aria-label="Filter tools" />
+          <span id="tools-count" class="muted"></span>
+        </div>
+        <div id="tools-list"></div>
+      </section>
+
+      <section id="view-targets" class="view" hidden>
+        <h2>Default tab for new clients</h2>
+        <p><select id="default-selection"></select> <span id="default-resolved" class="muted"></span></p>
+        <h2>Allowed tabs</h2>
+        <table>
+          <thead><tr><th>Tab</th><th>Title</th><th>Origin</th><th class="num">Tools</th><th>WebMCP</th><th class="num">Registrations</th><th>Last active</th></tr></thead>
+          <tbody id="targets-body"></tbody>
+        </table>
+        <h2>MCP clients</h2>
+        <table>
+          <thead><tr><th>Client</th><th>Connected</th><th>Last request</th><th>Uses</th><th>Resolves to</th></tr></thead>
+          <tbody id="sessions-body"></tbody>
+        </table>
+        <p id="extension-info" class="muted"></p>
+      </section>
+
+      <section id="view-stats" class="view" hidden>
+        <div id="stats-totals" class="totals"></div>
+        <h2>Per tool</h2>
+        <table>
+          <thead><tr><th>Tool</th><th>Origin</th><th class="num">Calls</th><th class="num">Errors</th><th class="num">Error rate</th><th class="num">Avg ms</th><th class="num">p50</th><th class="num">p95</th><th class="num">Max</th><th class="num">Avg size</th><th>Last</th></tr></thead>
+          <tbody id="stats-tools"></tbody>
+        </table>
+        <h2>Per client</h2>
+        <table>
+          <thead><tr><th>Client</th><th class="num">Calls</th><th class="num">Errors</th><th class="num">Avg ms</th><th>Last</th></tr></thead>
+          <tbody id="stats-clients"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script src="/ui/app.js"></script>
+  </body>
+</html>

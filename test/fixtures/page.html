@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Bridge test page</title>
+  </head>
+  <body>
+    <h1>Bridge test page</h1>
+    <p id="app">app: none</p>
+    <script>
+      // Behaves like Haven: tools are registered with an AbortSignal and the
+      // whole set is replaced when the focused app changes.
+      const mc = document.modelContext || navigator.modelContext;
+      let controller = null;
+      window.calls = [];
+
+      function register(app) {
+        controller?.abort();
+        controller = new AbortController();
+        const tools = [
+          {
+            name: "demo_echo",
+            description: "Echoes the input and says which origin answered.",
+            inputSchema: { type: "object", properties: { text: { type: "string" } }, required: ["text"] },
+            annotations: { readOnlyHint: true },
+            execute: async (input) => {
+              window.calls.push(input);
+              return { origin: location.origin, app, text: input.text };
+            },
+          },
+          {
+            name: "demo_locked",
+            description: "Fails like Haven does when it is locked.",
+            inputSchema: { type: "object", properties: {} },
+            execute: async () => {
+              throw new Error(JSON.stringify({ error: "LOCKED", message: "Haven is locked.", contextVersion: 1 }));
+            },
+          },
+        ];
+        if (app) {
+          tools.push({
+            name: `${app}_list`,
+            description: `Lists items of ${app}.`,
+            inputSchema: { type: "object", properties: {} },
+            annotations: { readOnlyHint: true, untrustedContentHint: true },
+            execute: async () => `items of ${app}`,
+          });
+        }
+        for (const tool of tools) mc.registerTool(tool, { signal: controller.signal });
+        document.getElementById("app").textContent = `app: ${app || "none"}`;
+      }
+
+      window.focusApp = register;
+      register(null);
+    </script>
+  </body>
+</html>
