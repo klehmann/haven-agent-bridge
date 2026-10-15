@@ -4,89 +4,150 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Haven Agent Bridge</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M9 11h6v10H9zM17 11h6v10h-6z' fill='white' opacity='.9'/%3E%3Cpath d='M15 16h2' stroke='white' stroke-width='2'/%3E%3C/svg%3E" />
     <link rel="stylesheet" href="/ui/style.css" />
   </head>
   <body>
-    <header class="top">
-      <div class="brand">
-        <h1>Haven Agent Bridge</h1>
-        <span id="status" class="chip">connecting…</span>
-      </div>
-      <div class="controls">
-        <label title="Keep arguments and responses of calls in the log"><input type="checkbox" id="recording" /> Record payloads</label>
-        <label title="Offer bridge_tools_list and bridge_tool_call for clients that ignore list_changed"><input type="checkbox" id="fallback" /> Fallback tools</label>
-        <span class="sep"></span>
-        <label><input type="checkbox" id="redact" /> Redact</label>
-        <button type="button" id="export-json">Export JSON</button>
-        <button type="button" id="export-ndjson">Export NDJSON</button>
-        <button type="button" id="clear">Clear</button>
-      </div>
-    </header>
-
-    <nav class="tabs" role="tablist">
-      <button role="tab" data-view="calls" aria-selected="true">Calls</button>
-      <button role="tab" data-view="tools" aria-selected="false">Tools</button>
-      <button role="tab" data-view="targets" aria-selected="false">Tabs &amp; clients</button>
-      <button role="tab" data-view="stats" aria-selected="false">Statistics</button>
-    </nav>
-
-    <main>
-      <section id="view-calls" class="view">
-        <div class="toolbar">
-          <input id="filter" type="search" placeholder="Filter by tool, client, origin, payload…" aria-label="Filter log" />
-          <label><input type="checkbox" id="show-events" checked /> Protocol events</label>
-          <label><input type="checkbox" id="errors-only" /> Errors only</label>
-          <span id="log-count" class="muted"></span>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="logo">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" class="logo-bg" /><path d="M9 11h6v10H9zM17 11h6v10h-6z" fill="white" opacity=".92" /><path d="M15 16h2" stroke="white" stroke-width="2" /></svg>
+          <div>
+            <strong>Agent Bridge</strong>
+            <span id="version" class="muted small"></span>
+          </div>
         </div>
-        <p id="recording-hint" class="hint" hidden>Recording is off: calls are listed with timing and errors, but without arguments and responses. Switch on “Record payloads” to keep them.</p>
-        <table class="log">
-          <thead>
-            <tr><th>Time</th><th>Kind</th><th>What</th><th>Client</th><th>Tab</th><th>Status</th><th class="num">ms</th><th class="num">Size</th></tr>
-          </thead>
-          <tbody id="log-body"></tbody>
-        </table>
-      </section>
-
-      <section id="view-tools" class="view" hidden>
-        <div class="toolbar">
-          <label>Tab <select id="tools-tab"></select></label>
-          <input id="tools-filter" type="search" placeholder="Filter tools…" aria-label="Filter tools" />
-          <span id="tools-count" class="muted"></span>
+        <nav class="tabs" role="tablist" aria-label="Views">
+          <button role="tab" data-view="calls" aria-selected="true">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h9" /></svg>
+            <span>Calls</span><span id="nav-calls" class="count"></span>
+          </button>
+          <button role="tab" data-view="tools" aria-selected="false">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 3.5a4 4 0 0 0-4.6 5.3L3 13.7 6.3 17l4.9-4.9a4 4 0 0 0 5.3-4.6l-2.6 2.6-2.4-.6-.6-2.4z" /></svg>
+            <span>Tools</span><span id="nav-tools" class="count"></span>
+          </button>
+          <button role="tab" data-view="targets" aria-selected="false">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12" rx="2" /><path d="M2.5 8h15M6 6h.01M8.5 6h.01" /></svg>
+            <span>Tabs &amp; clients</span><span id="nav-targets" class="count"></span>
+          </button>
+          <button role="tab" data-view="stats" aria-selected="false">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16V9M10 16V4M16 16v-5" /></svg>
+            <span>Statistics</span>
+          </button>
+        </nav>
+        <div class="side-settings">
+          <label class="switch" title="Keep arguments and responses of calls in the log">
+            <input type="checkbox" id="recording" /><span class="track"></span><span>Record payloads</span>
+          </label>
+          <label class="switch" title="Offer bridge_tools_list and bridge_tool_call for clients that ignore list_changed">
+            <input type="checkbox" id="fallback" /><span class="track"></span><span>Fallback tools</span>
+          </label>
         </div>
-        <div id="tools-list"></div>
-      </section>
+        <div class="side-export">
+          <span class="label">Export</span>
+          <div class="btn-row">
+            <button type="button" id="export-json">JSON</button>
+            <button type="button" id="export-ndjson">NDJSON</button>
+          </div>
+          <label class="check"><input type="checkbox" id="redact" /> Redact payloads</label>
+          <button type="button" id="clear" class="ghost danger">Clear log &amp; statistics</button>
+        </div>
+      </aside>
 
-      <section id="view-targets" class="view" hidden>
-        <h2>Default tab for new clients</h2>
-        <p><select id="default-selection"></select> <span id="default-resolved" class="muted"></span></p>
-        <h2>Allowed tabs</h2>
-        <table>
-          <thead><tr><th>Tab</th><th>Title</th><th>Origin</th><th class="num">Tools</th><th>WebMCP</th><th class="num">Registrations</th><th>Last active</th></tr></thead>
-          <tbody id="targets-body"></tbody>
-        </table>
-        <h2>MCP clients</h2>
-        <table>
-          <thead><tr><th>Client</th><th>Connected</th><th>Last request</th><th>Uses</th><th>Resolves to</th></tr></thead>
-          <tbody id="sessions-body"></tbody>
-        </table>
-        <p id="extension-info" class="muted"></p>
-      </section>
+      <div class="content">
+        <header class="hero">
+          <div class="hero-main">
+            <span id="status" class="pill">connecting…</span>
+            <h1 id="hero-title">Waiting for the browser…</h1>
+            <p id="hero-sub" class="muted"></p>
+          </div>
+          <div class="kpis" id="kpis"></div>
+        </header>
 
-      <section id="view-stats" class="view" hidden>
-        <div id="stats-totals" class="totals"></div>
-        <h2>Per tool</h2>
-        <table>
-          <thead><tr><th>Tool</th><th>Origin</th><th class="num">Calls</th><th class="num">Errors</th><th class="num">Error rate</th><th class="num">Avg ms</th><th class="num">p50</th><th class="num">p95</th><th class="num">Max</th><th class="num">Avg size</th><th>Last</th></tr></thead>
-          <tbody id="stats-tools"></tbody>
-        </table>
-        <h2>Per client</h2>
-        <table>
-          <thead><tr><th>Client</th><th class="num">Calls</th><th class="num">Errors</th><th class="num">Avg ms</th><th>Last</th></tr></thead>
-          <tbody id="stats-clients"></tbody>
-        </table>
-      </section>
-    </main>
+        <main>
+          <section id="view-calls" class="view">
+            <div class="toolbar">
+              <div class="search">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" /><path d="m13 13 4 4" /></svg>
+                <input id="filter" type="search" placeholder="Filter by tool, client, origin, payload…" aria-label="Filter log" />
+              </div>
+              <div class="segmented" role="group" aria-label="Show">
+                <label><input type="checkbox" id="show-events" checked /><span>Protocol events</span></label>
+                <label><input type="checkbox" id="errors-only" /><span>Errors only</span></label>
+              </div>
+              <span id="log-count" class="muted small"></span>
+            </div>
+            <p id="recording-hint" class="hint" hidden>
+              Recording is off: calls show timing and errors, but no arguments or responses. Switch on <strong>Record payloads</strong> to keep them.
+            </p>
+            <div class="card table-card">
+              <table class="log">
+                <thead>
+                  <tr><th>Time</th><th>Kind</th><th>What</th><th>Client</th><th>Tab</th><th>Status</th><th class="num">Duration</th><th class="num">Size</th></tr>
+                </thead>
+                <tbody id="log-body"></tbody>
+              </table>
+              <p id="log-empty" class="empty" hidden>Nothing yet. Calls from Goose, Claude Code or the Tools view appear here live.</p>
+            </div>
+          </section>
 
+          <section id="view-tools" class="view" hidden>
+            <div class="toolbar">
+              <label class="select-label">Tab <select id="tools-tab"></select></label>
+              <div class="search">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" /><path d="m13 13 4 4" /></svg>
+                <input id="tools-filter" type="search" placeholder="Filter tools…" aria-label="Filter tools" />
+              </div>
+              <span id="tools-count" class="muted small"></span>
+            </div>
+            <div id="tools-list" class="tool-grid"></div>
+          </section>
+
+          <section id="view-targets" class="view" hidden>
+            <div class="card pad">
+              <h2>Default tab for new clients</h2>
+              <div class="default-row"><select id="default-selection"></select> <span id="default-resolved" class="muted"></span></div>
+            </div>
+            <h2 class="section-title">Allowed tabs</h2>
+            <div class="card table-card">
+              <table>
+                <thead><tr><th>Tab</th><th>Title</th><th>Origin</th><th class="num">Tools</th><th>WebMCP</th><th class="num">Registrations</th><th>Last active</th></tr></thead>
+                <tbody id="targets-body"></tbody>
+              </table>
+            </div>
+            <h2 class="section-title">MCP clients</h2>
+            <div class="card table-card">
+              <table>
+                <thead><tr><th>Client</th><th>Connected</th><th>Last request</th><th>Uses</th><th>Resolves to</th></tr></thead>
+                <tbody id="sessions-body"></tbody>
+              </table>
+            </div>
+            <p id="extension-info" class="muted small"></p>
+          </section>
+
+          <section id="view-stats" class="view" hidden>
+            <div class="stats-grid">
+              <div class="card pad">
+                <h2>Calls per minute <span class="muted small">last 30 minutes</span></h2>
+                <div id="stats-timeline" class="timeline"></div>
+              </div>
+              <div class="card pad">
+                <h2>Per client</h2>
+                <div id="stats-clients-bars" class="bars"></div>
+              </div>
+            </div>
+            <h2 class="section-title">Per tool</h2>
+            <div class="card table-card">
+              <table class="stats">
+                <thead><tr><th>Tool</th><th>Calls</th><th class="num">Error rate</th><th>Latency p50 / p95</th><th class="num">Max</th><th class="num">Avg size</th><th>Last</th></tr></thead>
+                <tbody id="stats-tools"></tbody>
+              </table>
+            </div>
+            <div id="stats-clients" hidden></div>
+          </section>
+        </main>
+      </div>
+    </div>
     <script src="/ui/app.js"></script>
   </body>
 </html>

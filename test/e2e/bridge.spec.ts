@@ -197,7 +197,7 @@ test("debug GUI shows tabs, tools and the call log", async () => {
   const page = await context.newPage();
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(`http://127.0.0.1:${port}/ui#token=${token}`);
-  await expect(page.locator("#status")).toContainText("browser connected");
+  await expect(page.locator("#status")).toContainText("Browser connected");
   await expect(page.locator("#log-body")).toContainText("demo_echo");
   await page.locator("#log-body tr.row", { hasText: "demo_echo" }).first().click();
   await expect(page.locator("#log-body .detail")).toContainText("Arguments");
@@ -212,8 +212,14 @@ test("debug GUI shows tabs, tools and the call log", async () => {
   await page.screenshot({ path: join(ROOT, "test-results/gui-stats.png") });
 
   await page.getByRole("tab", { name: "Tabs & clients" }).click();
-  await expect(page.locator("#targets-body")).toContainText(ORIGIN_A);
+  await expect(page.locator("#targets-body")).toContainText("127.0.0.1:4601");
   await page.screenshot({ path: join(ROOT, "test-results/gui-targets.png") });
+
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.getByRole("tab", { name: "Calls" }).click();
+  await page.locator("#log-body tr.row", { hasText: "demo_locked" }).first().click();
+  await page.screenshot({ path: join(ROOT, "test-results/gui-calls-dark.png") });
+  await page.emulateMedia({ colorScheme: "light" });
 
   const exported = await (
     await fetch(`http://127.0.0.1:${port}/api/export?format=json&redact=1`, { headers: { "x-bridge-token": token } })
