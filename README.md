@@ -14,9 +14,9 @@ graph LR
   D --> UI[debug GUI /ui]
 ```
 
-What it does differently from [webmcp-bridge](https://github.com/nathan-gage/webmcp-bridge):
+What it does:
 
-- **One tab per client, no duplicates.** A client sees the tools of exactly one tab, under their original names. Two Haven tabs no longer show every `haven_*` tool twice.
+- **One tab per client, no duplicates.** A client sees the tools of exactly one tab, under their original names. Two Haven tabs do not show every `haven_*` tool twice.
 - **Bound to tab and origin.** You choose the tab in the extension popup or the GUI: the tab you used last (default), any tab of one origin, or one pinned tab. A call names the tab and the origin it expects; if the tab has navigated elsewhere, the call fails instead of running there.
 - **Allowlist instead of `<all_urls>`.** Content scripts run only on allowed sites (default: `http://localhost:4174`, `https://haven.mindoodb.com`, `https://mindoodb-haven-develop.pages.dev`). Add more in the popup.
 - **Calls go where the client looked.** A client's calls run in the tab, page document and tool definition of its last `tools/list`, even if you switch tabs in between. If that tab closed, reloaded or navigated, or the tool changed, the call is refused with `STATE_CHANGED` and the client is told to list again.
@@ -33,8 +33,8 @@ npm install
 npm run build
 ```
 
-1. **Extension:** `chrome://extensions` → Developer mode → *Load unpacked* → the `extension/` folder. Disable the webmcp-bridge extension if it is installed, or both expose the same tools. Reload tabs that were open before.
-2. **MCP client:** register the stdio command. Goose (`~/.config/goose/config.yaml`, replacing the `webmcp-bridge` entry):
+1. **Extension:** `chrome://extensions` → Developer mode → *Load unpacked* → the `extension/` folder. Disable any other WebMCP bridge extension, or both expose the same tools. Reload tabs that were open before.
+2. **MCP client:** register the stdio command. Goose (`~/.config/goose/config.yaml`, replacing any other WebMCP bridge entry):
 
    ```yaml
    extensions:
