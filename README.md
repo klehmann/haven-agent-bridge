@@ -55,6 +55,9 @@ npm run build
 
 The extension badge shows the tool count of the selected tab (green), `–` when no allowed tab matches (yellow), nothing when the daemon is not running (grey).
 
+<p align="center"><img src="docs/images/extension-popup.png" alt="Extension popup with tab selection, recording switch and allowed sites" width="420"></p>
+<p align="center"><em>The extension popup: which tab the tools come from, payload recording, and the allowed sites.</em></p>
+
 ## Commands
 
 ```bash
@@ -75,6 +78,18 @@ Open it from the popup (*Debug GUI*) or with `node dist/cli.js ui`.
 - **Tabs & clients:** the default tab for new clients and, per connected client, which tab it uses.
 - **Statistics:** per tool and per client since the start or the last *Clear*.
 - **Export:** JSON (log, statistics, tabs, clients) or NDJSON (log only); *Redact* replaces arguments, responses and errors with their length.
+
+![Calls view with an expanded tab event](docs/images/debug-gui-calls.png)
+*Calls: the log with protocol events interleaved; an expanded row shows its detail and can be copied as JSON.*
+
+![Tools view with a Try it result](docs/images/debug-gui-tools.png)
+*Tools: description, annotations and per-tool numbers; here* Try it *has run `haven_get_context` in the tab.*
+
+![Tabs and clients view](docs/images/debug-gui-tabs-clients.png)
+*Tabs & clients: the default tab for new clients, the allowed tabs with their tool counts, and the connected MCP clients.*
+
+![Statistics view](docs/images/debug-gui-statistics.png)
+*Statistics: calls per minute, per client and per tool with error rate, p50/p95 latency and response size.*
 
 *Record payloads* is off by default: calls are then logged with timing but without arguments, responses or the page's error text, which can carry user data; only an error code such as `LOCKED` is kept (the bridge's own messages, like a refused call, are kept in full). Everything stays on this machine; with `logFile: true` in the settings the log is also appended to `~/.haven-agent-bridge/calls.ndjson`.
 
