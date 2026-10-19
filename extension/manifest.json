@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Haven Agent Bridge",
-  "description": "Connects the WebMCP tools of one chosen tab (Haven and other allowed sites) to MCP clients such as Goose or Claude Code.",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "version": "0.1.0",
   "minimum_chrome_version": "116",
   "permissions": ["tabs", "storage", "scripting", "alarms"],

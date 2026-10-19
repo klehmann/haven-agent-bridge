@@ -20,11 +20,19 @@ change that adds it: labels, buttons, placeholders, empty states, errors,
   form of address: German *du*, Spanish *tú*, French *vous*, Italian *tu*,
   Norwegian *du*, Dutch *je*, Polish informal.
 
-**In this repo:** user-facing texts are the Chrome extension's popup
-(`extension/popup.html`, `extension/popup.js`) and the debug GUI (`ui/index.html`,
-`ui/app.js`). For the extension, `chrome.i18n` with `extension/_locales/<lang>/messages.json`
-(`default_locale: "en"`) is the natural place; for the GUI, a typed table.
+**In this repo:** user-facing texts are the Chrome extension's popup and toolbar tooltip
+(`extension/popup.html`, `extension/popup.js`, `extension/background.js`) and the debug GUI
+(`ui/index.html`, `ui/app.js`).
 
-**Known gap:** the bridge is English only today (both the popup and the debug GUI have
-hard-coded English strings, `lang="en"`). New texts must not widen the gap; moving the
-existing ones into tables is open work.
+- **Extension:** `chrome.i18n` with `extension/_locales/<lang>/messages.json`
+  (`default_locale: "en"`; Chrome's folder for Norwegian Bokmål is `nb`, a `no` folder is
+  ignored). HTML gets its texts from `data-i18n` / `data-i18n-aria-label` via
+  `extension/i18n.js` (`__MSG_…__` only works in the manifest and CSS). Counted texts are
+  `<key>_<plural category>` and go through `plural()`.
+- **Debug GUI:** the table in `ui/i18n.js` (`t`, `tc` for counts, `tNodes` for texts with
+  markup), locale from `navigator.language`. HTML uses `data-i18n`,
+  `data-i18n-placeholder` and `data-i18n-aria-label`.
+- `src/i18n.test.ts` (part of `npm test`) fails when a language misses a key, a
+  placeholder or a plural form, or when code uses a key English does not define.
+- Stays English on purpose: MCP/protocol names (`tools/list`, `list_changed`, tool names),
+  error texts sent to agents, daemon log lines and event titles, the product name.

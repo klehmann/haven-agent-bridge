@@ -75,7 +75,7 @@ header {
   overflow-wrap: anywhere;
 }
 .selected .title::after {
-  content: " ← connected";
+  content: " ← " attr(data-connected-label);
   color: var(--accent);
   font-weight: 400;
 }

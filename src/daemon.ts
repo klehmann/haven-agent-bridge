@@ -271,6 +271,7 @@ export class BridgeDaemon {
     if (path === "/" || path === "/ui" || path === "/ui/") {
       return sendFile(res, "index.html", "text/html; charset=utf-8");
     }
+    if (path === "/ui/i18n.js") return sendFile(res, "i18n.js", "text/javascript; charset=utf-8");
     if (path === "/ui/app.js") return sendFile(res, "app.js", "text/javascript; charset=utf-8");
     if (path === "/ui/style.css") return sendFile(res, "style.css", "text/css; charset=utf-8");
 

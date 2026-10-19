@@ -1,5 +1,6 @@
 // Debug GUI of the Haven Agent Bridge. Everything shown comes from web pages
 // and MCP clients, so it is always set as text, never as HTML.
+// Texts come from i18n.js (t, tc, tNodes, num, LOCALE), loaded before this file.
 "use strict";
 
 const TOKEN_KEY = "haven-agent-bridge-token";
@@ -23,6 +24,15 @@ const token = (() => {
 })();
 
 const $ = (id) => document.getElementById(id);
+
+localize(document);
+$("fallback-help").replaceChildren(
+  ...tNodes("fallbackToolsHelp", {
+    listTool: el("code", { textContent: "bridge_tools_list" }),
+    callTool: el("code", { textContent: "bridge_tool_call" }),
+  }),
+);
+$("recording-hint").replaceChildren(...tNodes("recordingHint", { setting: el("strong", { textContent: t("recordPayloads") }) }));
 
 function el(tag, props = {}, ...children) {
   const node = document.createElement(tag);
@@ -50,7 +60,7 @@ async function api(path, options = {}) {
     ...options,
     headers: { "x-bridge-token": token, "content-type": "application/json", ...(options.headers || {}) },
   });
-  if (res.status === 401) throw new Error("Wrong or missing token: open the GUI from the extension or `haven-agent-bridge ui`.");
+  if (res.status === 401) throw new Error(t("wrongToken"));
   return res;
 }
 
@@ -67,25 +77,30 @@ let view = "calls";
 // --- formatting ---
 
 function time(ms) {
-  return new Date(ms).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return new Date(ms).toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 function ago(ms) {
-  if (!ms) return "never";
+  if (!ms) return t("never");
   const s = Math.round((Date.now() - ms) / 1000);
-  if (s < 5) return "just now";
-  if (s < 60) return `${s}s ago`;
-  if (s < 3600) return `${Math.round(s / 60)} min ago`;
+  if (s < 5) return t("justNow");
+  const relative = new Intl.RelativeTimeFormat(LOCALE, { style: "short" });
+  if (s < 60) return relative.format(-s, "second");
+  if (s < 3600) return relative.format(-Math.round(s / 60), "minute");
   return time(ms);
 }
 function size(bytes) {
   if (bytes === undefined || bytes === null) return "";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  const unit = (value, name, digits) =>
+    num(value, { style: "unit", unit: name, unitDisplay: "short", minimumFractionDigits: digits, maximumFractionDigits: digits });
+  if (bytes < 1024) return unit(bytes, "byte", 0);
+  if (bytes < 1024 * 1024) return unit(bytes / 1024, "kilobyte", 1);
+  return unit(bytes / 1024 / 1024, "megabyte", 1);
 }
 function ms(value) {
   if (value === undefined || value === null) return "";
-  return value < 1000 ? `${value} ms` : `${(value / 1000).toFixed(1)} s`;
+  return value < 1000
+    ? num(value, { style: "unit", unit: "millisecond", unitDisplay: "short", maximumFractionDigits: 0 })
+    : num(value / 1000, { style: "unit", unit: "second", unitDisplay: "short", minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 function parseMaybe(value) {
   if (typeof value !== "string") return value;
@@ -171,37 +186,37 @@ function defaultTarget() {
 }
 
 function describeSelection(selection) {
-  if (!selection) return "default tab";
-  if (selection.mode === "active") return "follows the tab used last";
-  if (selection.mode === "origin") return `any tab on ${selection.origin}`;
-  return `pinned to tab #${selection.tabId}`;
+  if (!selection) return t("selDefault");
+  if (selection.mode === "active") return t("selActive");
+  if (selection.mode === "origin") return t("selOrigin", { origin: selection.origin });
+  return t("selTab", { tabId: selection.tabId });
 }
 
 function renderHeader() {
   if (!state) return;
-  $("version").textContent = `v${state.version} · port ${state.port}`;
+  $("version").textContent = t("versionLine", { version: state.version, port: state.port });
   const ext = state.extension;
   const pill = $("status");
-  pill.textContent = ext.connected ? "Browser connected" : "Browser not connected";
+  pill.textContent = ext.connected ? t("browserConnected") : t("browserNotConnected");
   pill.className = `pill ${ext.connected ? "ok" : "err"}`;
 
   const target = defaultTarget();
-  $("hero-title").textContent = target ? target.title || target.origin : ext.connected ? "No allowed tab selected" : "Waiting for the browser…";
+  $("hero-title").textContent = target ? target.title || target.origin : ext.connected ? t("heroNoTab") : t("heroWaiting");
   const sub = $("hero-sub");
   sub.replaceChildren();
   if (target) {
-    sub.append(originChip(target.origin), ` · ${target.tools.length} tools · ${describeSelection(state.settings.defaultSelection)} · ${state.sessions.length} client(s)`);
+    sub.append(originChip(target.origin), ` · ${tc("toolsCount", target.tools.length)} · ${describeSelection(state.settings.defaultSelection)} · ${tc("clientsCount", state.sessions.length)}`);
   } else {
     sub.textContent = ext.connected
-      ? "Open Haven (or another allowed site) in Chrome; reload tabs that were open before the extension."
-      : "Is Chrome running with the Haven Agent Bridge extension?";
+      ? t("heroHintConnected")
+      : t("heroHintDisconnected");
   }
 
   $("recording").checked = state.settings.recording;
   $("fallback").checked = state.settings.fallbackTools;
   $("recording-hint").hidden = state.settings.recording;
-  $("nav-tools").textContent = target ? String(target.tools.length) : "";
-  $("nav-targets").textContent = String(state.targets.length);
+  $("nav-tools").textContent = target ? num(target.tools.length) : "";
+  $("nav-targets").textContent = num(state.targets.length);
   renderKpis();
 }
 
@@ -213,18 +228,18 @@ function renderKpis() {
   const kpi = (label, value, extra, bad) =>
     el("div", { class: "kpi" }, el("span", { class: `value${bad ? " bad" : ""}`, textContent: value }), el("span", { class: "label", textContent: label }), extra);
   $("kpis").replaceChildren(
-    kpi("calls", String(totals.calls), sparkline(series.ok.map((v, i) => v + series.err[i]))),
-    kpi("error rate", totals.calls ? `${rate} %` : "–", sparkline(series.err), rate >= 20),
-    kpi("slowest p95", p95 === null ? "–" : ms(p95)),
-    kpi("clients", String(state ? state.sessions.length : 0)),
+    kpi(t("kpiCalls"), num(totals.calls), sparkline(series.ok.map((v, i) => v + series.err[i]))),
+    kpi(t("kpiErrorRate"), totals.calls ? num(rate / 100, { style: "percent" }) : "–", sparkline(series.err), rate >= 20),
+    kpi(t("kpiSlowest"), p95 === null ? "–" : ms(p95)),
+    kpi(t("kpiClients"), num(state ? state.sessions.length : 0)),
   );
-  $("nav-calls").textContent = String(totals.calls || "");
+  $("nav-calls").textContent = totals.calls ? num(totals.calls) : "";
 }
 
 $("recording").addEventListener("change", (e) => post("/api/settings", { recording: e.target.checked }));
 $("fallback").addEventListener("change", (e) => post("/api/settings", { fallbackTools: e.target.checked }));
 $("clear").addEventListener("click", async () => {
-  if (!confirm("Clear the log and the statistics?")) return;
+  if (!confirm(t("confirmClear"))) return;
   await post("/api/clear", {});
   entries.clear();
   expanded.clear();
@@ -290,14 +305,21 @@ function matches(entry, query) {
   return hay.includes(query);
 }
 
+// tools/list and list_changed are MCP protocol names and stay as they are.
 const KIND_LABEL = {
-  call: "call",
+  call: t("kindCall"),
   tools_list: "tools/list",
   list_changed: "list_changed",
-  targets: "tabs",
-  session: "client",
-  extension: "browser",
-  note: "note",
+  targets: t("kindTabs"),
+  session: t("kindClient"),
+  extension: t("kindBrowser"),
+  note: t("kindNote"),
+};
+const STATUS_LABEL = {
+  ok: t("statusOk"),
+  error: t("statusError"),
+  running: t("statusRunning"),
+  info: t("statusEvent"),
 };
 
 function renderLog() {
@@ -308,7 +330,7 @@ function renderLog() {
     .filter((e) => (showEvents || e.kind === "call") && (!errorsOnly || e.status === "error") && matches(e, query))
     .sort((a, b) => b.id - a.id)
     .slice(0, 500);
-  $("log-count").textContent = `${list.length} of ${entries.size} entries`;
+  $("log-count").textContent = tc("logCount", entries.size, { shown: num(list.length) });
   $("log-empty").hidden = list.length > 0;
   const slowest = Math.max(1, ...list.filter((e) => e.durationMs !== undefined).map((e) => e.durationMs));
   const body = $("log-body");
@@ -336,7 +358,7 @@ function renderLog() {
       el("td", { class: "what" }, e.kind === "call" ? el("span", { class: "call", textContent: e.tool }) : el("span", { class: "event", textContent: e.title })),
       el("td", { class: "client", textContent: e.client || "" }),
       el("td", {}, e.origin ? originChip(e.origin) : ""),
-      el("td", {}, el("span", { class: `status ${e.status}`, textContent: e.status === "info" ? "event" : e.status })),
+      el("td", {}, el("span", { class: `status ${e.status}`, textContent: STATUS_LABEL[e.status] || e.status })),
       el("td", { class: "num" }, duration),
       el("td", { class: "num muted", textContent: size(e.bytes) }),
     );
@@ -364,28 +386,28 @@ function pane(label, value, isError) {
 function detailRow(e) {
   const parts = [];
   if (e.kind === "call") {
-    if (e.args !== undefined) parts.push(pane("Arguments", e.args));
-    if (e.result !== undefined) parts.push(pane("Response", e.result));
-    if (e.error !== undefined) parts.push(pane("Error", e.error, true));
+    if (e.args !== undefined) parts.push(pane(t("paneArguments"), e.args));
+    if (e.result !== undefined) parts.push(pane(t("paneResponse"), e.result));
+    if (e.error !== undefined) parts.push(pane(t("paneError"), e.error, true));
     if (e.payloadOmitted) {
-      parts.push(el("p", { class: "muted", textContent: "Arguments and response were not recorded (Record payloads was off)." }));
+      parts.push(el("p", { class: "muted", textContent: t("payloadOmitted") }));
     }
   }
-  if (e.detail !== undefined) parts.push(pane("Detail", e.detail));
-  const copy = el("button", { type: "button", textContent: "Copy as JSON" });
+  if (e.detail !== undefined) parts.push(pane(t("paneDetail"), e.detail));
+  const copy = el("button", { type: "button", textContent: t("copyJson") });
   copy.addEventListener("click", (ev) => {
     ev.stopPropagation();
     navigator.clipboard.writeText(JSON.stringify(e, null, 2));
-    copy.textContent = "Copied";
-    setTimeout(() => (copy.textContent = "Copy as JSON"), 1200);
+    copy.textContent = t("copied");
+    setTimeout(() => (copy.textContent = t("copyJson")), 1200);
   });
   const head = el(
     "div",
     { class: "detail-head" },
     el("span", { textContent: `#${e.id}` }),
     el("span", { textContent: new Date(e.at).toISOString() }),
-    e.tabId !== undefined ? el("span", { textContent: `tab #${e.tabId}` }) : null,
-    e.sessionId ? el("span", { class: "mono", textContent: `session ${e.sessionId.slice(0, 8)}` }) : null,
+    e.tabId !== undefined ? el("span", { textContent: t("tabRef", { tabId: e.tabId }) }) : null,
+    e.sessionId ? el("span", { class: "mono", textContent: t("sessionRef", { id: e.sessionId.slice(0, 8) }) }) : null,
     copy,
   );
   return el("tr", { class: "detail" }, el("td", { colSpan: 8 }, head, el("div", { class: "detail-grid" }, ...parts)));
@@ -446,13 +468,13 @@ function renderToolList() {
   const box = $("tools-list");
   box.replaceChildren();
   if (!target) {
-    box.append(el("p", { class: "empty card", textContent: "No allowed tab with tools is open." }));
+    box.append(el("p", { class: "empty card", textContent: t("noToolsTab") }));
     $("tools-count").textContent = "";
     return;
   }
   const query = $("tools-filter").value.trim().toLowerCase();
   const tools = target.tools.filter((t) => !query || `${t.name}\n${t.description}`.toLowerCase().includes(query));
-  $("tools-count").textContent = `${tools.length} of ${target.tools.length} tools · registration #${target.generation}`;
+  $("tools-count").textContent = tc("toolsOf", target.tools.length, { shown: num(tools.length), generation: target.generation });
   for (const tool of tools) {
     const a = tool.annotations || {};
     const schema = tool.inputSchema || {};
@@ -460,31 +482,31 @@ function renderToolList() {
     const params = Object.keys(schema.properties || {});
     const usage = toolUsage(tool.name, target.origin);
 
-    const desc = el("p", { class: "tool-desc", textContent: tool.description || "No description." });
+    const desc = el("p", { class: "tool-desc", textContent: tool.description || t("noDescription") });
     desc.addEventListener("click", () => desc.classList.toggle("full"));
 
     const schemaPre = jsonPre(schema);
     schemaPre.hidden = true;
     const tryBox = el("div", { class: "try", hidden: true });
-    const input = el("textarea", { value: JSON.stringify(skeleton(schema), null, 2), spellcheck: false, "aria-label": `Input for ${tool.name}` });
+    const input = el("textarea", { value: JSON.stringify(skeleton(schema), null, 2), spellcheck: false, "aria-label": t("inputFor", { tool: tool.name }) });
     const output = el("div");
-    const run = el("button", { type: "button", class: "primary", textContent: "Run in this tab" });
+    const run = el("button", { type: "button", class: "primary", textContent: t("runInTab") });
     const note = el("span", { class: "muted" });
     run.addEventListener("click", async () => {
       let args;
       try {
         args = JSON.parse(input.value || "{}");
       } catch (error) {
-        note.textContent = `Invalid JSON: ${error.message}`;
+        note.textContent = t("invalidJson", { message: error.message });
         return;
       }
-      if (a.consequentialHint && !confirm(`${tool.name} changes data. Run it?`)) return;
+      if (a.consequentialHint && !confirm(t("confirmConsequential", { tool: tool.name }))) return;
       run.disabled = true;
-      note.textContent = "running…";
+      note.textContent = t("running");
       const started = performance.now();
       try {
         const result = await post("/api/call", { tabId: target.tabId, name: tool.name, args });
-        note.textContent = `${result.isError ? "error" : "ok"} · ${Math.round(performance.now() - started)} ms`;
+        note.textContent = `${result.isError ? t("statusError") : t("statusOk")} · ${ms(Math.round(performance.now() - started))}`;
         output.replaceChildren(jsonPre(result.structuredContent ?? result.content, result.isError ? "err" : ""));
       } catch (error) {
         note.textContent = String(error);
@@ -494,9 +516,9 @@ function renderToolList() {
     });
     tryBox.append(input, el("div", { class: "actions" }, run, note), output);
 
-    const schemaButton = el("button", { type: "button", textContent: "Schema" });
+    const schemaButton = el("button", { type: "button", textContent: t("schema") });
     schemaButton.addEventListener("click", () => (schemaPre.hidden = !schemaPre.hidden));
-    const tryButton = el("button", { type: "button", textContent: "Try it" });
+    const tryButton = el("button", { type: "button", textContent: t("tryIt") });
     tryButton.addEventListener("click", () => {
       tryBox.hidden = !tryBox.hidden;
       if (!tryBox.hidden) input.focus();
@@ -510,16 +532,16 @@ function renderToolList() {
           "div",
           { class: "tool-head" },
           el("span", { class: "tool-name", textContent: tool.name }),
-          a.readOnlyHint ? el("span", { class: "badge ro", textContent: "read-only" }) : null,
-          a.consequentialHint ? el("span", { class: "badge cq", textContent: "consequential" }) : null,
-          a.untrustedContentHint ? el("span", { class: "badge ut", textContent: "untrusted content" }) : null,
+          a.readOnlyHint ? el("span", { class: "badge ro", textContent: t("badgeReadOnly") }) : null,
+          a.consequentialHint ? el("span", { class: "badge cq", textContent: t("badgeConsequential") }) : null,
+          a.untrustedContentHint ? el("span", { class: "badge ut", textContent: t("badgeUntrusted") }) : null,
         ),
         desc,
         params.length
           ? el("div", { class: "tool-meta" }, ...params.map((p) => el("span", { class: `param${required.has(p) ? " req" : ""}`, textContent: required.has(p) ? `${p}*` : p })))
-          : el("div", { class: "tool-meta", textContent: "no parameters" }),
+          : el("div", { class: "tool-meta", textContent: t("noParameters") }),
         usage
-          ? el("div", { class: "tool-meta", textContent: `${usage.calls} call(s) · ${usage.errors} error(s) · p95 ${ms(usage.p95Ms)}` })
+          ? el("div", { class: "tool-meta", textContent: `${tc("callsCount", usage.calls)} · ${tc("errorsCount", usage.errors)} · p95 ${ms(usage.p95Ms)}` })
           : null,
         el("div", { class: "tool-actions" }, tryButton, schemaButton),
         schemaPre,
@@ -534,11 +556,11 @@ function renderToolList() {
 function selectionOptions(select, current, includeDefault) {
   select.replaceChildren();
   const add = (value, label) => select.append(el("option", { value, textContent: label }));
-  if (includeDefault) add("default", "Default tab");
-  add("active", "The allowed tab used last");
+  if (includeDefault) add("default", t("optDefaultTab"));
+  add("active", t("optActive"));
   const origins = [...new Set(state.targets.map((t) => t.origin))];
-  for (const origin of origins) add(`origin:${origin}`, `Any tab on ${origin}`);
-  for (const t of state.targets) add(`tab:${t.tabId}:${t.origin}`, `Tab #${t.tabId}: ${t.title || t.origin}`);
+  for (const origin of origins) add(`origin:${origin}`, t("optOrigin", { origin }));
+  for (const tab of state.targets) add(`tab:${tab.tabId}:${tab.origin}`, t("optTab", { tabId: tab.tabId, title: tab.title || tab.origin }));
   const key = !current
     ? "default"
     : current.mode === "active"
@@ -547,7 +569,9 @@ function selectionOptions(select, current, includeDefault) {
         ? `origin:${current.origin}`
         : `tab:${current.tabId}:${current.origin}`;
   if (![...select.options].some((o) => o.value === key)) {
-    add(key, current && current.mode === "tab" ? `Tab #${current.tabId} on ${current.origin} (gone)` : `${current?.origin ?? key} (not open)`);
+    add(key, current && current.mode === "tab"
+        ? t("optTabGone", { tabId: current.tabId, origin: current.origin })
+        : t("optNotOpen", { origin: current?.origin ?? key }),);
   }
   select.value = key;
 }
@@ -568,31 +592,31 @@ function renderTargets() {
   const res = $("default-resolved");
   res.replaceChildren();
   if (resolved) res.append("→ ", originChip(resolved.origin), ` ${resolved.title || ""}`);
-  else res.textContent = "→ no matching tab";
+  else res.textContent = `→ ${t("noMatchingTab")}`;
 
   const body = $("targets-body");
   body.replaceChildren();
-  for (const t of state.targets) {
+  for (const tab of state.targets) {
     body.append(
       el(
         "tr",
-        { class: t.tabId === state.defaultTabId ? "is-default" : "" },
-        el("td", { class: "mono", textContent: `#${t.tabId}` }),
-        el("td", { textContent: t.title }),
-        el("td", {}, originChip(t.origin)),
-        el("td", { class: "num", textContent: String(t.tools.length) }),
-        el("td", {}, el("span", { class: `tag${t.native ? " call" : ""}`, textContent: t.native ? "native" : "polyfill" })),
-        el("td", { class: "num", textContent: String(t.generation) }),
-        el("td", { class: "muted", textContent: ago(t.lastActiveAt) }),
+        { class: tab.tabId === state.defaultTabId ? "is-default" : "" },
+        el("td", { class: "mono", textContent: `#${tab.tabId}` }),
+        el("td", { textContent: tab.title }),
+        el("td", {}, originChip(tab.origin)),
+        el("td", { class: "num", textContent: num(tab.tools.length) }),
+        el("td", {}, el("span", { class: `tag${tab.native ? " call" : ""}`, textContent: tab.native ? t("native") : t("polyfill") })),
+        el("td", { class: "num", textContent: num(tab.generation) }),
+        el("td", { class: "muted", textContent: ago(tab.lastActiveAt) }),
       ),
     );
   }
-  if (!state.targets.length) body.append(el("tr", {}, el("td", { colSpan: 7, class: "empty", textContent: "No allowed tab is open." })));
+  if (!state.targets.length) body.append(el("tr", {}, el("td", { colSpan: 7, class: "empty", textContent: t("noAllowedTab") })));
 
   const sessions = $("sessions-body");
   sessions.replaceChildren();
   for (const s of state.sessions) {
-    const select = el("select", { "aria-label": `Tab for ${s.client}` });
+    const select = el("select", { "aria-label": t("tabForClient", { client: s.client }) });
     selectionOptions(select, s.selection, true);
     select.addEventListener("change", () => post(`/api/sessions/${encodeURIComponent(s.id)}/selection`, { selection: parseSelection(select.value) }));
     const tab = state.targets.find((t) => t.tabId === s.tabId);
@@ -604,16 +628,16 @@ function renderTargets() {
         el("td", { class: "muted", textContent: ago(s.createdAt) }),
         el("td", { class: "muted", textContent: ago(s.lastSeenAt) }),
         el("td", {}, select),
-        el("td", {}, tab ? originChip(tab.origin, ` #${tab.tabId}`) : el("span", { class: "muted", textContent: "no tab" })),
+        el("td", {}, tab ? originChip(tab.origin, ` #${tab.tabId}`) : el("span", { class: "muted", textContent: t("noTab") })),
       ),
     );
   }
-  if (!state.sessions.length) sessions.append(el("tr", {}, el("td", { colSpan: 5, class: "empty", textContent: "No MCP client connected." })));
+  if (!state.sessions.length) sessions.append(el("tr", {}, el("td", { colSpan: 5, class: "empty", textContent: t("noClients") })));
 
   const ext = state.extension;
   $("extension-info").textContent = ext.connected
-    ? `Extension ${ext.version} · allowed origins: ${(ext.origins || []).join(", ")}`
-    : "The browser extension is not connected.";
+    ? t("extensionInfo", { version: ext.version, origins: new Intl.ListFormat(LOCALE, { type: "unit" }).format(ext.origins || []) })
+    : t("extensionNotConnected");
 }
 
 // --- stats ---
@@ -638,7 +662,7 @@ function renderTimeline() {
   const bottom = 22;
   const bw = W / minutes;
   const plot = H - top - bottom;
-  const root = svg("svg", { viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "none", role: "img", "aria-label": "Calls per minute" });
+  const root = svg("svg", { viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "none", role: "img", "aria-label": t("callsPerMinute") });
   root.append(svg("line", { class: "axis", x1: 0, x2: W, y1: H - bottom, y2: H - bottom }));
   for (let i = 0; i < minutes; i++) {
     const okH = (ok[i] / max) * plot;
@@ -647,9 +671,9 @@ function renderTimeline() {
     if (ok[i]) root.append(svg("rect", { class: "bar-ok", x, y: H - bottom - okH, width: bw - 4, height: okH, rx: 2 }));
     if (err[i]) root.append(svg("rect", { class: "bar-err", x, y: H - bottom - okH - errH, width: bw - 4, height: errH, rx: 2 }));
   }
-  root.append(svg("text", { x: 0, y: H - 6 }, document.createTextNode("−30 min")));
-  root.append(svg("text", { x: W, y: H - 6, "text-anchor": "end" }, document.createTextNode("now")));
-  root.append(svg("text", { x: 0, y: top + 2 }, document.createTextNode(`${max}/min`)));
+  root.append(svg("text", { x: 0, y: H - 6 }, document.createTextNode(num(-30, { style: "unit", unit: "minute", unitDisplay: "short" }))));
+  root.append(svg("text", { x: W, y: H - 6, "text-anchor": "end" }, document.createTextNode(t("axisNow"))));
+  root.append(svg("text", { x: 0, y: top + 2 }, document.createTextNode(t("perMinuteMax", { count: num(max) }))));
   $("stats-timeline").replaceChildren(root);
 }
 
@@ -674,12 +698,12 @@ function renderStats() {
         "div",
         { class: "hbar" },
         el("span", { class: "name", textContent: c.client }),
-        el("span", { class: "val", textContent: `${c.calls} · ${ms(c.avgMs)} avg` }),
+        el("span", { class: "val", textContent: t("clientAvg", { calls: num(c.calls), avg: ms(c.avgMs) }) }),
         trackBar(c.calls - c.errors, c.errors, clientMax),
       ),
     ),
   );
-  if (!stats.clients.length) clients.append(el("p", { class: "muted", textContent: "No calls yet." }));
+  if (!stats.clients.length) clients.append(el("p", { class: "muted", textContent: t("noCallsYet") }));
 
   const callMax = Math.max(1, ...stats.tools.map((t) => t.calls));
   const latencyMax = Math.max(1, ...stats.tools.map((t) => t.p95Ms));
@@ -693,8 +717,8 @@ function renderStats() {
         "tr",
         {},
         el("td", {}, el("div", { class: "mono", textContent: s.tool }), originChip(s.origin)),
-        el("td", { class: "calls-cell" }, el("span", { textContent: `${s.calls} (${s.errors} failed)` }), trackBar(s.calls - s.errors, s.errors, callMax)),
-        el("td", { class: `num${s.errorRate >= 0.2 ? " rate-bad" : ""}`, textContent: `${Math.round(s.errorRate * 100)} %` }),
+        el("td", { class: "calls-cell" }, el("span", { textContent: t("callsFailed", { calls: num(s.calls), failed: num(s.errors) }) }), trackBar(s.calls - s.errors, s.errors, callMax)),
+        el("td", { class: `num${s.errorRate >= 0.2 ? " rate-bad" : ""}`, textContent: num(s.errorRate, { style: "percent" }) }),
         el("td", {}, el("span", { class: "muted", textContent: `${ms(s.p50Ms)} / ${ms(s.p95Ms)}` }), latency),
         el("td", { class: "num", textContent: ms(s.maxMs) }),
         el("td", { class: "num", textContent: size(s.avgBytes) }),
@@ -702,7 +726,7 @@ function renderStats() {
       );
     }),
   );
-  if (!stats.tools.length) tools.append(el("tr", {}, el("td", { colSpan: 7, class: "empty", textContent: "No calls yet." })));
+  if (!stats.tools.length) tools.append(el("tr", {}, el("td", { colSpan: 7, class: "empty", textContent: t("noCallsYet") })));
 }
 
 // --- live updates ---
@@ -733,16 +757,16 @@ function connectEvents() {
     if (entry.kind === "call" && entry.status !== "running") scheduleStats();
   });
   source.onerror = () => {
-    $("status").textContent = "Bridge not reachable, retrying…";
+    $("status").textContent = t("bridgeUnreachable");
     $("status").className = "pill err";
   };
 }
 
 (async () => {
   if (!token) {
-    $("status").textContent = "No token";
+    $("status").textContent = t("noToken");
     $("status").className = "pill err";
-    $("hero-title").textContent = "Open the GUI from the extension popup or with `haven-agent-bridge ui`.";
+    $("hero-title").textContent = t("openFromExtension");
     return;
   }
   try {
@@ -757,7 +781,7 @@ function connectEvents() {
       if (view === "stats") renderStats();
     }, 15000);
   } catch (error) {
-    $("status").textContent = "Error";
+    $("status").textContent = t("error");
     $("status").className = "pill err";
     $("hero-title").textContent = String(error.message || error);
   }

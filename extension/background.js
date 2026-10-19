@@ -3,6 +3,9 @@
 // they were meant for. A call names the tab and the origin it expects; if the
 // tab shows another origin by now, the call fails instead of running there.
 
+import "./i18n.js";
+
+const { msg, plural } = globalThis.habI18n;
 const PROTOCOL = 1;
 const PORT_FIRST = 13300;
 const PORT_LAST = 13309;
@@ -364,9 +367,9 @@ function updateBadge() {
   chrome.action.setTitle({
     title: connected
       ? target
-        ? `Haven Agent Bridge: ${target.tools.length} tools from ${target.origin}`
-        : "Haven Agent Bridge: no tab selected"
-      : "Haven Agent Bridge: bridge not running",
+        ? msg("badgeTools", plural("toolsCount", target.tools.length), target.origin)
+        : msg("badgeNoTab")
+      : msg("badgeNotRunning"),
   });
 }
 

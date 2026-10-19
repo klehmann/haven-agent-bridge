@@ -1,0 +1,176 @@
+{
+  "extDescription": {
+    "message": "Conecta las herramientas WebMCP de una pestaña elegida (Haven y otros sitios permitidos) con clientes MCP como Goose o Claude Code."
+  },
+  "connecting": {
+    "message": "Conectando…"
+  },
+  "toolsSourceHeading": {
+    "message": "Las herramientas para clientes MCP vienen de"
+  },
+  "targetsAria": {
+    "message": "Pestaña para clientes MCP"
+  },
+  "recordPayloads": {
+    "message": "Registrar argumentos y respuestas"
+  },
+  "debugGui": {
+    "message": "Interfaz de depuración"
+  },
+  "allowedSites": {
+    "message": "Sitios permitidos"
+  },
+  "originInputAria": {
+    "message": "Origen que permitir"
+  },
+  "allow": {
+    "message": "Permitir"
+  },
+  "statusConnected": {
+    "message": "Conectado al bridge en el puerto $PORT$ · $CLIENTS$",
+    "placeholders": {
+      "port": {
+        "content": "$1"
+      },
+      "clients": {
+        "content": "$2"
+      }
+    }
+  },
+  "statusNotRunning": {
+    "message": "El bridge no está en ejecución. Inicia tu cliente MCP o ejecuta: haven-agent-bridge daemon"
+  },
+  "choiceActiveTitle": {
+    "message": "La pestaña permitida que usé por última vez"
+  },
+  "choiceActiveNow": {
+    "message": "ahora: $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceActiveFollows": {
+    "message": "sigue tus cambios de pestaña"
+  },
+  "choiceOriginTitle": {
+    "message": "Cualquier pestaña de $ORIGIN$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceOriginSub": {
+    "message": "la usada por última vez"
+  },
+  "choiceConnected": {
+    "message": "conectada"
+  },
+  "polyfill": {
+    "message": "polyfill"
+  },
+  "noAllowedTab": {
+    "message": "No hay ninguna pestaña permitida abierta."
+  },
+  "reload": {
+    "message": "Recargar"
+  },
+  "notConnectedYet": {
+    "message": "Aún no conectada: $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "remove": {
+    "message": "Quitar"
+  },
+  "removeOriginAria": {
+    "message": "Quitar $ORIGIN$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveFailed": {
+    "message": "No se pudo guardar."
+  },
+  "invalidOrigin": {
+    "message": "Introduce una URL como https://example.com o http://localhost:5173"
+  },
+  "onlyHttp": {
+    "message": "Solo se admiten sitios http y https."
+  },
+  "permissionDenied": {
+    "message": "Chrome no concedió acceso a ese sitio."
+  },
+  "badgeTools": {
+    "message": "Haven Agent Bridge: $TOOLS$ de $ORIGIN$",
+    "placeholders": {
+      "tools": {
+        "content": "$1"
+      },
+      "origin": {
+        "content": "$2"
+      }
+    }
+  },
+  "badgeNoTab": {
+    "message": "Haven Agent Bridge: ninguna pestaña elegida"
+  },
+  "badgeNotRunning": {
+    "message": "Haven Agent Bridge: el bridge no está en ejecución"
+  },
+  "clientsCount_one": {
+    "message": "$COUNT$ cliente MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clientsCount_many": {
+    "message": "$COUNT$ clientes MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clientsCount_other": {
+    "message": "$COUNT$ clientes MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_one": {
+    "message": "$COUNT$ herramienta",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_many": {
+    "message": "$COUNT$ herramientas",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_other": {
+    "message": "$COUNT$ herramientas",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  }
+}

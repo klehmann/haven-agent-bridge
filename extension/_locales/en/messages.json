@@ -1,0 +1,206 @@
+{
+  "extDescription": {
+    "message": "Connects the WebMCP tools of one chosen tab (Haven and other allowed sites) to MCP clients such as Goose or Claude Code.",
+    "description": "Extension description in the Chrome Web Store and chrome://extensions."
+  },
+  "connecting": {
+    "message": "Connecting…",
+    "description": "Popup status while connecting to the local bridge daemon."
+  },
+  "toolsSourceHeading": {
+    "message": "Tools for MCP clients come from",
+    "description": "Popup heading above the choice of tab whose tools MCP clients get."
+  },
+  "targetsAria": {
+    "message": "Tab for MCP clients",
+    "description": "Accessible name of the tab choice."
+  },
+  "recordPayloads": {
+    "message": "Record arguments and responses",
+    "description": "Checkbox: keep tool call arguments and responses in the debug log."
+  },
+  "debugGui": {
+    "message": "Debug GUI",
+    "description": "Button that opens the debug GUI in a tab."
+  },
+  "allowedSites": {
+    "message": "Allowed sites",
+    "description": "Heading of the list of web origins the extension may connect."
+  },
+  "originInputAria": {
+    "message": "Origin to allow",
+    "description": "Accessible name of the input for a new origin."
+  },
+  "allow": {
+    "message": "Allow",
+    "description": "Button that adds the typed origin to the allowed sites."
+  },
+  "statusConnected": {
+    "message": "Connected to the bridge on port $PORT$ · $CLIENTS$",
+    "description": "Popup status. port: TCP port number; clients: text from clientsCount.",
+    "placeholders": {
+      "port": {
+        "content": "$1",
+        "example": "13300"
+      },
+      "clients": {
+        "content": "$2",
+        "example": "2 MCP clients"
+      }
+    }
+  },
+  "statusNotRunning": {
+    "message": "Bridge not running. Start your MCP client, or run: haven-agent-bridge daemon",
+    "description": "Popup status when no local daemon answers. Keep the command as is."
+  },
+  "choiceActiveTitle": {
+    "message": "The allowed tab I used last",
+    "description": "Tab choice: always use the allowed tab the user activated last."
+  },
+  "choiceActiveNow": {
+    "message": "now: $TITLE$",
+    "description": "Subtitle: which tab that currently is.",
+    "placeholders": {
+      "title": {
+        "content": "$1",
+        "example": "Haven"
+      }
+    }
+  },
+  "choiceActiveFollows": {
+    "message": "follows your tab switches",
+    "description": "Subtitle when the choice is not the current default."
+  },
+  "choiceOriginTitle": {
+    "message": "Any tab on $ORIGIN$",
+    "description": "Tab choice: any tab of one origin.",
+    "placeholders": {
+      "origin": {
+        "content": "$1",
+        "example": "https://haven.mindoodb.com"
+      }
+    }
+  },
+  "choiceOriginSub": {
+    "message": "the one used last",
+    "description": "Subtitle of the origin choice: the tab of that origin used last."
+  },
+  "choiceConnected": {
+    "message": "connected",
+    "description": "Marker after the tab that MCP clients are using right now."
+  },
+  "polyfill": {
+    "message": "polyfill",
+    "description": "Marker for tabs whose WebMCP comes from the extension's polyfill instead of Chrome."
+  },
+  "noAllowedTab": {
+    "message": "No allowed tab is open.",
+    "description": "Empty state of the tab choice."
+  },
+  "reload": {
+    "message": "Reload",
+    "description": "Link button that reloads a tab that has not connected yet."
+  },
+  "notConnectedYet": {
+    "message": "Not connected yet: $TITLE$",
+    "description": "A tab opened before the extension was installed; title: tab title.",
+    "placeholders": {
+      "title": {
+        "content": "$1",
+        "example": "Haven"
+      }
+    }
+  },
+  "remove": {
+    "message": "Remove",
+    "description": "Link button that removes an allowed origin."
+  },
+  "removeOriginAria": {
+    "message": "Remove $ORIGIN$",
+    "description": "Accessible name of the remove button.",
+    "placeholders": {
+      "origin": {
+        "content": "$1",
+        "example": "https://haven.mindoodb.com"
+      }
+    }
+  },
+  "saveFailed": {
+    "message": "Could not save.",
+    "description": "Error when the allowed origins could not be stored."
+  },
+  "invalidOrigin": {
+    "message": "Enter a URL like https://example.com or http://localhost:5173",
+    "description": "Error for an input that is not a URL. Keep the example URLs."
+  },
+  "onlyHttp": {
+    "message": "Only http and https sites are supported.",
+    "description": "Error for non-http(s) origins."
+  },
+  "permissionDenied": {
+    "message": "Chrome did not grant access to that site.",
+    "description": "Error when Chrome's permission prompt was declined."
+  },
+  "badgeTools": {
+    "message": "Haven Agent Bridge: $TOOLS$ from $ORIGIN$",
+    "description": "Toolbar button tooltip. tools: text from toolsCount; origin: web origin.",
+    "placeholders": {
+      "tools": {
+        "content": "$1",
+        "example": "10 tools"
+      },
+      "origin": {
+        "content": "$2",
+        "example": "https://haven.mindoodb.com"
+      }
+    }
+  },
+  "badgeNoTab": {
+    "message": "Haven Agent Bridge: no tab selected",
+    "description": "Toolbar button tooltip when no tab is selected."
+  },
+  "badgeNotRunning": {
+    "message": "Haven Agent Bridge: bridge not running",
+    "description": "Toolbar button tooltip when the local daemon is not running."
+  },
+  "clientsCount_one": {
+    "message": "$COUNT$ MCP client",
+    "description": "Number of connected MCP clients (Goose, Claude Code, …).",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "clientsCount_other": {
+    "message": "$COUNT$ MCP clients",
+    "description": "Number of connected MCP clients (Goose, Claude Code, …).",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toolsCount_one": {
+    "message": "$COUNT$ tool",
+    "description": "Number of WebMCP tools a tab offers.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toolsCount_other": {
+    "message": "$COUNT$ tools",
+    "description": "Number of WebMCP tools a tab offers.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  }
+}
