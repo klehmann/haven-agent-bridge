@@ -34,7 +34,9 @@ npm run build
 ```
 
 1. **Extension:** `chrome://extensions` → Developer mode → *Load unpacked* → the `extension/` folder. Disable any other WebMCP bridge extension, or both expose the same tools. Reload tabs that were open before.
-2. **MCP client:** register the stdio command. Goose (`~/.config/goose/config.yaml`, replacing any other WebMCP bridge entry):
+2. **MCP client:** register the stdio command `node <path to haven-agent-bridge>/dist/cli.js`. Use absolute paths: desktop apps often start without your shell's `PATH`, so take the node binary from `which node` (with nvm it lives under `~/.nvm/versions/node/<version>/bin/node`).
+
+   Goose (`~/.config/goose/config.yaml`, replacing any other WebMCP bridge entry):
 
    ```yaml
    extensions:
@@ -42,16 +44,29 @@ npm run build
        enabled: true
        type: stdio
        name: haven
-       cmd: /Users/klehmann/.nvm/versions/node/v22.18.0/bin/node
+       cmd: /absolute/path/to/node
        args:
-         - /Users/klehmann/git/mindoodb-workspace/haven-agent-bridge/dist/cli.js
+         - /absolute/path/to/haven-agent-bridge/dist/cli.js
        timeout: 300
    ```
 
-   Claude Code: `claude mcp add haven -- node /path/to/haven-agent-bridge/dist/cli.js`
+   Claude Desktop (*Settings → Developer → Edit Config*, i.e. `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS, `%APPDATA%\Claude\claude_desktop_config.json` on Windows), then restart Claude Desktop:
+
+   ```json
+   {
+     "mcpServers": {
+       "haven": {
+         "command": "/absolute/path/to/node",
+         "args": ["/absolute/path/to/haven-agent-bridge/dist/cli.js"]
+       }
+     }
+   }
+   ```
+
+   Claude Code: `claude mcp add haven -- node /absolute/path/to/haven-agent-bridge/dist/cli.js`
 
    Clients that speak Streamable HTTP can also connect directly to `http://127.0.0.1:13300/mcp` with `Authorization: Bearer <token>` (token in `~/.haven-agent-bridge/token`).
-3. **Haven:** Settings → General → offer tools to AI agents.
+3. **Haven:** Preferences → General → Agent tools → *Offer agent tools*, and tick the apps that may offer their own tools (the same switch is *Offer tools to AI agents* in each app's settings).
 
 The extension badge shows the tool count of the selected tab (green), `–` when no allowed tab matches (yellow), nothing when the daemon is not running (grey).
 
