@@ -1,0 +1,160 @@
+{
+  "extDescription": {
+    "message": "Verbindt de WebMCP-tools van één gekozen tabblad (Haven en andere toegestane sites) met MCP-clients zoals Goose of Claude Code."
+  },
+  "connecting": {
+    "message": "Verbinden…"
+  },
+  "toolsSourceHeading": {
+    "message": "Tools voor MCP-clients komen uit"
+  },
+  "targetsAria": {
+    "message": "Tabblad voor MCP-clients"
+  },
+  "recordPayloads": {
+    "message": "Argumenten en antwoorden vastleggen"
+  },
+  "debugGui": {
+    "message": "Debugweergave"
+  },
+  "allowedSites": {
+    "message": "Toegestane sites"
+  },
+  "originInputAria": {
+    "message": "Toe te staan origin"
+  },
+  "allow": {
+    "message": "Toestaan"
+  },
+  "statusConnected": {
+    "message": "Verbonden met de bridge op poort $PORT$ · $CLIENTS$",
+    "placeholders": {
+      "port": {
+        "content": "$1"
+      },
+      "clients": {
+        "content": "$2"
+      }
+    }
+  },
+  "statusNotRunning": {
+    "message": "Bridge draait niet. Start je MCP-client of voer uit: haven-agent-bridge daemon"
+  },
+  "choiceActiveTitle": {
+    "message": "Het toegestane tabblad dat ik als laatste gebruikte"
+  },
+  "choiceActiveNow": {
+    "message": "nu: $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceActiveFollows": {
+    "message": "volgt je tabbladwissels"
+  },
+  "choiceOriginTitle": {
+    "message": "Elk tabblad op $ORIGIN$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceOriginSub": {
+    "message": "het laatst gebruikte"
+  },
+  "choiceConnected": {
+    "message": "verbonden"
+  },
+  "polyfill": {
+    "message": "polyfill"
+  },
+  "noAllowedTab": {
+    "message": "Er is geen toegestaan tabblad open."
+  },
+  "reload": {
+    "message": "Opnieuw laden"
+  },
+  "notConnectedYet": {
+    "message": "Nog niet verbonden: $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "remove": {
+    "message": "Verwijderen"
+  },
+  "removeOriginAria": {
+    "message": "$ORIGIN$ verwijderen",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveFailed": {
+    "message": "Opslaan mislukt."
+  },
+  "invalidOrigin": {
+    "message": "Voer een URL in zoals https://example.com of http://localhost:5173"
+  },
+  "onlyHttp": {
+    "message": "Alleen http- en https-sites worden ondersteund."
+  },
+  "permissionDenied": {
+    "message": "Chrome heeft geen toegang tot die site gegeven."
+  },
+  "badgeTools": {
+    "message": "Haven Agent Bridge: $TOOLS$ van $ORIGIN$",
+    "placeholders": {
+      "tools": {
+        "content": "$1"
+      },
+      "origin": {
+        "content": "$2"
+      }
+    }
+  },
+  "badgeNoTab": {
+    "message": "Haven Agent Bridge: geen tabblad gekozen"
+  },
+  "badgeNotRunning": {
+    "message": "Haven Agent Bridge: bridge draait niet"
+  },
+  "clientsCount_one": {
+    "message": "$COUNT$ MCP-client",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clientsCount_other": {
+    "message": "$COUNT$ MCP-clients",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_one": {
+    "message": "$COUNT$ tool",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_other": {
+    "message": "$COUNT$ tools",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  }
+}

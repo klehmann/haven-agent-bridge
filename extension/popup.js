@@ -1,5 +1,8 @@
 "use strict";
 
+const { msg, plural, localize } = globalThis.habI18n;
+localize(document);
+
 const port = chrome.runtime.connect({ name: "popup" });
 let view = null;
 
@@ -35,6 +38,7 @@ function choice(key, title, sub, selection, connected) {
     input,
     el("span", {}, el("div", { className: "title", textContent: title }), el("div", { className: "sub", textContent: sub })),
   );
+  if (connected) label.querySelector(".title").dataset.connectedLabel = msg("choiceConnected");
   return label;
 }
 
@@ -42,8 +46,8 @@ function render() {
   if (!view) return;
   const d = view.daemon;
   $("connection").textContent = view.connected
-    ? `Connected to the bridge on port ${view.port} · ${d ? d.sessions : 0} MCP client(s)`
-    : "Bridge not running. Start your MCP client, or run: haven-agent-bridge daemon";
+    ? msg("statusConnected", view.port, plural("clientsCount", d ? d.sessions : 0))
+    : msg("statusNotRunning");
 
   const resolved = d ? d.resolvedTabId : null;
   const box = $("targets");
@@ -52,8 +56,8 @@ function render() {
   box.append(
     choice(
       "active",
-      "The allowed tab I used last",
-      active && d && d.defaultSelection.mode === "active" ? `now: ${active.title || active.origin}` : "follows your tab switches",
+      msg("choiceActiveTitle"),
+      active && d && d.defaultSelection.mode === "active" ? msg("choiceActiveNow", active.title || active.origin) : msg("choiceActiveFollows"),
       { mode: "active" },
       false,
     ),
@@ -65,14 +69,14 @@ function render() {
   }
   for (const [origin, tabs] of byOrigin) {
     if (tabs.length > 1) {
-      box.append(choice(`origin:${origin}`, `Any tab on ${origin}`, "the one used last", { mode: "origin", origin }, false));
+      box.append(choice(`origin:${origin}`, msg("choiceOriginTitle", origin), msg("choiceOriginSub"), { mode: "origin", origin }, false));
     }
     for (const t of tabs) {
       box.append(
         choice(
           `tab:${t.tabId}`,
           t.title || origin,
-          `${origin} · ${t.tools.length} tools${t.native ? "" : " · polyfill"}`,
+          `${origin} · ${plural("toolsCount", t.tools.length)}${t.native ? "" : ` · ${msg("polyfill")}`}`,
           { mode: "tab", tabId: t.tabId, origin: t.origin },
           t.tabId === resolved,
         ),
@@ -80,15 +84,15 @@ function render() {
     }
   }
   if (!view.targets.length) {
-    box.append(el("p", { className: "muted", textContent: "No allowed tab is open." }));
+    box.append(el("p", { className: "muted", textContent: msg("noAllowedTab") }));
   }
 
   const silent = $("silent");
   silent.replaceChildren();
   for (const t of view.silentTabs) {
-    const reload = el("button", { type: "button", className: "link", textContent: "Reload" });
+    const reload = el("button", { type: "button", className: "link", textContent: msg("reload") });
     reload.addEventListener("click", () => port.postMessage({ type: "reload-tab", tabId: t.tabId }));
-    silent.append(el("p", { className: "muted" }, `Not connected yet: ${t.title || t.origin} `, reload));
+    silent.append(el("p", { className: "muted" }, `${msg("notConnectedYet", t.title || t.origin)} `, reload));
   }
 
   $("recording").checked = Boolean(d && d.recording);
@@ -98,8 +102,8 @@ function render() {
   const list = $("origins");
   list.replaceChildren();
   for (const origin of view.origins) {
-    const remove = el("button", { type: "button", className: "link", textContent: "Remove" });
-    remove.setAttribute("aria-label", `Remove ${origin}`);
+    const remove = el("button", { type: "button", className: "link", textContent: msg("remove") });
+    remove.setAttribute("aria-label", msg("removeOriginAria", origin));
     remove.addEventListener("click", () => setOrigins(view.origins.filter((o) => o !== origin)));
     list.append(el("li", {}, el("span", { textContent: origin }), remove));
   }
@@ -107,7 +111,7 @@ function render() {
 
 async function setOrigins(origins) {
   const res = await chrome.runtime.sendMessage({ type: "popup:set-origins", origins });
-  if (!res || !res.ok) showError(res ? res.error : "Could not save");
+  if (!res || !res.ok) showError(res ? res.error : msg("saveFailed"));
   port.postMessage({ type: "status" });
 }
 
@@ -124,13 +128,13 @@ $("add-origin").addEventListener("submit", async (event) => {
   try {
     origin = new URL($("origin-input").value.trim()).origin;
   } catch {
-    return showError("Enter a URL like https://example.com or http://localhost:5173");
+    return showError(msg("invalidOrigin"));
   }
-  if (!/^https?:/.test(origin)) return showError("Only http and https sites are supported.");
+  if (!/^https?:/.test(origin)) return showError(msg("onlyHttp"));
   const url = new URL(origin);
   // Permissions must be requested from the click itself.
   const granted = await chrome.permissions.request({ origins: [`${url.protocol}//${url.hostname}/*`] });
-  if (!granted) return showError("Chrome did not grant access to that site.");
+  if (!granted) return showError(msg("permissionDenied"));
   $("origin-input").value = "";
   await setOrigins([...view.origins, origin]);
 });

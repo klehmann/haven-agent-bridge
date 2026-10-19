@@ -8,30 +8,31 @@
   <body>
     <header>
       <h1>Haven Agent Bridge</h1>
-      <p id="connection" class="muted">Connecting…</p>
+      <p id="connection" class="muted" data-i18n="connecting">Connecting…</p>
     </header>
 
     <section>
-      <h2>Tools for MCP clients come from</h2>
-      <div id="targets" role="radiogroup" aria-label="Tab for MCP clients"></div>
+      <h2 data-i18n="toolsSourceHeading">Tools for MCP clients come from</h2>
+      <div id="targets" role="radiogroup" aria-label="Tab for MCP clients" data-i18n-aria-label="targetsAria"></div>
       <div id="silent"></div>
     </section>
 
     <section class="row">
-      <label><input type="checkbox" id="recording" /> Record arguments and responses</label>
-      <button id="open-ui" type="button">Debug GUI</button>
+      <label><input type="checkbox" id="recording" /> <span data-i18n="recordPayloads">Record arguments and responses</span></label>
+      <button id="open-ui" type="button" data-i18n="debugGui">Debug GUI</button>
     </section>
 
     <section>
-      <h2>Allowed sites</h2>
+      <h2 data-i18n="allowedSites">Allowed sites</h2>
       <ul id="origins"></ul>
       <form id="add-origin">
-        <input id="origin-input" type="url" placeholder="https://example.com" aria-label="Origin to allow" required />
-        <button type="submit">Allow</button>
+        <input id="origin-input" type="url" placeholder="https://example.com" aria-label="Origin to allow" data-i18n-aria-label="originInputAria" required />
+        <button type="submit" data-i18n="allow">Allow</button>
       </form>
       <p id="origin-error" class="error" hidden></p>
     </section>
 
+    <script src="i18n.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

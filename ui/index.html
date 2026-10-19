@@ -17,56 +17,56 @@
             <span id="version" class="muted small"></span>
           </div>
         </div>
-        <nav class="tabs" role="tablist" aria-label="Views">
+        <nav class="tabs" role="tablist" aria-label="Views" data-i18n-aria-label="navViews">
           <button role="tab" data-view="calls" aria-selected="true">
             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h9" /></svg>
-            <span>Calls</span><span id="nav-calls" class="count"></span>
+            <span data-i18n="navCalls">Calls</span><span id="nav-calls" class="count"></span>
           </button>
           <button role="tab" data-view="tools" aria-selected="false">
             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 3.5a4 4 0 0 0-4.6 5.3L3 13.7 6.3 17l4.9-4.9a4 4 0 0 0 5.3-4.6l-2.6 2.6-2.4-.6-.6-2.4z" /></svg>
-            <span>Tools</span><span id="nav-tools" class="count"></span>
+            <span data-i18n="navTools">Tools</span><span id="nav-tools" class="count"></span>
           </button>
           <button role="tab" data-view="targets" aria-selected="false">
             <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12" rx="2" /><path d="M2.5 8h15M6 6h.01M8.5 6h.01" /></svg>
-            <span>Tabs &amp; clients</span><span id="nav-targets" class="count"></span>
+            <span data-i18n="navTargets">Tabs &amp; clients</span><span id="nav-targets" class="count"></span>
           </button>
           <button role="tab" data-view="stats" aria-selected="false">
             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16V9M10 16V4M16 16v-5" /></svg>
-            <span>Statistics</span>
+            <span data-i18n="navStats">Statistics</span>
           </button>
         </nav>
         <div class="side-settings">
           <label class="switch">
             <input type="checkbox" id="recording" aria-describedby="recording-help" /><span class="track"></span>
             <span class="switch-text">
-              <span>Record payloads</span>
-              <small id="recording-help">Keeps arguments, responses and error texts in the log. Off: only timing and error codes, since payloads can contain personal data.</small>
+              <span data-i18n="recordPayloads">Record payloads</span>
+              <small id="recording-help" data-i18n="recordPayloadsHelp">Keeps arguments, responses and error texts in the log. Off: only timing and error codes, since payloads can contain personal data.</small>
             </span>
           </label>
           <label class="switch">
             <input type="checkbox" id="fallback" aria-describedby="fallback-help" /><span class="track"></span>
             <span class="switch-text">
-              <span>Fallback tools</span>
+              <span data-i18n="fallbackTools">Fallback tools</span>
               <small id="fallback-help">For MCP clients that keep their first tool list and ignore tab or app changes: adds <code>bridge_tools_list</code> and <code>bridge_tool_call</code>, so the agent can list and run the current tab's tools itself. Goose and Claude Code don't need it.</small>
             </span>
           </label>
         </div>
         <div class="side-export">
-          <span class="label">Export</span>
+          <span class="label" data-i18n="export">Export</span>
           <div class="btn-row">
             <button type="button" id="export-json">JSON</button>
             <button type="button" id="export-ndjson">NDJSON</button>
           </div>
-          <label class="check"><input type="checkbox" id="redact" /> Redact payloads</label>
-          <button type="button" id="clear" class="ghost danger">Clear log &amp; statistics</button>
+          <label class="check"><input type="checkbox" id="redact" /> <span data-i18n="redact">Redact payloads</span></label>
+          <button type="button" id="clear" class="ghost danger" data-i18n="clearLog">Clear log &amp; statistics</button>
         </div>
       </aside>
 
       <div class="content">
         <header class="hero">
           <div class="hero-main">
-            <span id="status" class="pill">connecting…</span>
-            <h1 id="hero-title">Waiting for the browser…</h1>
+            <span id="status" class="pill" data-i18n="statusConnecting">connecting…</span>
+            <h1 id="hero-title" data-i18n="heroWaiting">Waiting for the browser…</h1>
             <p id="hero-sub" class="muted"></p>
           </div>
           <div class="kpis" id="kpis"></div>
@@ -77,11 +77,11 @@
             <div class="toolbar">
               <div class="search">
                 <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" /><path d="m13 13 4 4" /></svg>
-                <input id="filter" type="search" placeholder="Filter by tool, client, origin, payload…" aria-label="Filter log" />
+                <input id="filter" type="search" placeholder="Filter by tool, client, origin, payload…" aria-label="Filter log" data-i18n-placeholder="filterPlaceholder" data-i18n-aria-label="filterAria" />
               </div>
-              <div class="segmented" role="group" aria-label="Show">
-                <label><input type="checkbox" id="show-events" checked /><span>Protocol events</span></label>
-                <label><input type="checkbox" id="errors-only" /><span>Errors only</span></label>
+              <div class="segmented" role="group" aria-label="Show" data-i18n-aria-label="showAria">
+                <label><input type="checkbox" id="show-events" checked /><span data-i18n="showEvents">Protocol events</span></label>
+                <label><input type="checkbox" id="errors-only" /><span data-i18n="errorsOnly">Errors only</span></label>
               </div>
               <span id="log-count" class="muted small"></span>
             </div>
@@ -91,20 +91,20 @@
             <div class="card table-card">
               <table class="log">
                 <thead>
-                  <tr><th>Time</th><th>Kind</th><th>What</th><th>Client</th><th>Tab</th><th>Status</th><th class="num">Duration</th><th class="num">Size</th></tr>
+                  <tr><th data-i18n="colTime">Time</th><th data-i18n="colKind">Kind</th><th data-i18n="colWhat">What</th><th data-i18n="colClient">Client</th><th data-i18n="colTab">Tab</th><th data-i18n="colStatus">Status</th><th class="num" data-i18n="colDuration">Duration</th><th class="num" data-i18n="colSize">Size</th></tr>
                 </thead>
                 <tbody id="log-body"></tbody>
               </table>
-              <p id="log-empty" class="empty" hidden>Nothing yet. Calls from Goose, Claude Code or the Tools view appear here live.</p>
+              <p id="log-empty" class="empty" data-i18n="logEmpty" hidden>Nothing yet. Calls from Goose, Claude Code or the Tools view appear here live.</p>
             </div>
           </section>
 
           <section id="view-tools" class="view" hidden>
             <div class="toolbar">
-              <label class="select-label">Tab <select id="tools-tab"></select></label>
+              <label class="select-label"><span data-i18n="toolsTab">Tab</span> <select id="tools-tab"></select></label>
               <div class="search">
                 <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" /><path d="m13 13 4 4" /></svg>
-                <input id="tools-filter" type="search" placeholder="Filter tools…" aria-label="Filter tools" />
+                <input id="tools-filter" type="search" placeholder="Filter tools…" aria-label="Filter tools" data-i18n-placeholder="toolsFilterPlaceholder" data-i18n-aria-label="toolsFilterAria" />
               </div>
               <span id="tools-count" class="muted small"></span>
             </div>
@@ -113,20 +113,20 @@
 
           <section id="view-targets" class="view" hidden>
             <div class="card pad">
-              <h2>Default tab for new clients</h2>
+              <h2 data-i18n="defaultTabHeading">Default tab for new clients</h2>
               <div class="default-row"><select id="default-selection"></select> <span id="default-resolved" class="muted"></span></div>
             </div>
-            <h2 class="section-title">Allowed tabs</h2>
+            <h2 class="section-title" data-i18n="allowedTabs">Allowed tabs</h2>
             <div class="card table-card">
               <table>
-                <thead><tr><th>Tab</th><th>Title</th><th>Origin</th><th class="num">Tools</th><th>WebMCP</th><th class="num">Registrations</th><th>Last active</th></tr></thead>
+                <thead><tr><th data-i18n="colTab">Tab</th><th data-i18n="colTitle">Title</th><th data-i18n="colOrigin">Origin</th><th class="num" data-i18n="colTools">Tools</th><th>WebMCP</th><th class="num" data-i18n="colRegistrations">Registrations</th><th data-i18n="colLastActive">Last active</th></tr></thead>
                 <tbody id="targets-body"></tbody>
               </table>
             </div>
-            <h2 class="section-title">MCP clients</h2>
+            <h2 class="section-title" data-i18n="mcpClients">MCP clients</h2>
             <div class="card table-card">
               <table>
-                <thead><tr><th>Client</th><th>Connected</th><th>Last request</th><th>Uses</th><th>Resolves to</th></tr></thead>
+                <thead><tr><th data-i18n="colClient">Client</th><th data-i18n="colConnected">Connected</th><th data-i18n="colLastRequest">Last request</th><th data-i18n="colUses">Uses</th><th data-i18n="colResolvesTo">Resolves to</th></tr></thead>
                 <tbody id="sessions-body"></tbody>
               </table>
             </div>
@@ -136,18 +136,18 @@
           <section id="view-stats" class="view" hidden>
             <div class="stats-grid">
               <div class="card pad">
-                <h2>Calls per minute <span class="muted small">last 30 minutes</span></h2>
+                <h2><span data-i18n="callsPerMinute">Calls per minute</span> <span class="muted small" data-i18n="last30">last 30 minutes</span></h2>
                 <div id="stats-timeline" class="timeline"></div>
               </div>
               <div class="card pad">
-                <h2>Per client</h2>
+                <h2 data-i18n="perClient">Per client</h2>
                 <div id="stats-clients-bars" class="bars"></div>
               </div>
             </div>
-            <h2 class="section-title">Per tool</h2>
+            <h2 class="section-title" data-i18n="perTool">Per tool</h2>
             <div class="card table-card">
               <table class="stats">
-                <thead><tr><th>Tool</th><th>Calls</th><th class="num">Error rate</th><th>Latency p50 / p95</th><th class="num">Max</th><th class="num">Avg size</th><th>Last</th></tr></thead>
+                <thead><tr><th data-i18n="colTool">Tool</th><th data-i18n="colCalls">Calls</th><th class="num" data-i18n="colErrorRate">Error rate</th><th data-i18n="colLatency">Latency p50 / p95</th><th class="num" data-i18n="colMax">Max</th><th class="num" data-i18n="colAvgSize">Avg size</th><th data-i18n="colLast">Last</th></tr></thead>
                 <tbody id="stats-tools"></tbody>
               </table>
             </div>
@@ -156,6 +156,7 @@
         </main>
       </div>
     </div>
+    <script src="/ui/i18n.js"></script>
     <script src="/ui/app.js"></script>
   </body>
 </html>

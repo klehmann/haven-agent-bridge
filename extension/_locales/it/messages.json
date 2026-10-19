@@ -1,0 +1,176 @@
+{
+  "extDescription": {
+    "message": "Collega gli strumenti WebMCP di una scheda scelta (Haven e altri siti consentiti) a client MCP come Goose o Claude Code."
+  },
+  "connecting": {
+    "message": "Connessione…"
+  },
+  "toolsSourceHeading": {
+    "message": "Gli strumenti per i client MCP vengono da"
+  },
+  "targetsAria": {
+    "message": "Scheda per i client MCP"
+  },
+  "recordPayloads": {
+    "message": "Registra argomenti e risposte"
+  },
+  "debugGui": {
+    "message": "Interfaccia di debug"
+  },
+  "allowedSites": {
+    "message": "Siti consentiti"
+  },
+  "originInputAria": {
+    "message": "Origine da consentire"
+  },
+  "allow": {
+    "message": "Consenti"
+  },
+  "statusConnected": {
+    "message": "Connesso al bridge sulla porta $PORT$ · $CLIENTS$",
+    "placeholders": {
+      "port": {
+        "content": "$1"
+      },
+      "clients": {
+        "content": "$2"
+      }
+    }
+  },
+  "statusNotRunning": {
+    "message": "Il bridge non è in esecuzione. Avvia il tuo client MCP oppure esegui: haven-agent-bridge daemon"
+  },
+  "choiceActiveTitle": {
+    "message": "La scheda consentita che ho usato per ultima"
+  },
+  "choiceActiveNow": {
+    "message": "ora: $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceActiveFollows": {
+    "message": "segue i tuoi cambi di scheda"
+  },
+  "choiceOriginTitle": {
+    "message": "Qualsiasi scheda su $ORIGIN$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceOriginSub": {
+    "message": "quella usata per ultima"
+  },
+  "choiceConnected": {
+    "message": "connessa"
+  },
+  "polyfill": {
+    "message": "polyfill"
+  },
+  "noAllowedTab": {
+    "message": "Nessuna scheda consentita è aperta."
+  },
+  "reload": {
+    "message": "Ricarica"
+  },
+  "notConnectedYet": {
+    "message": "Non ancora connessa: $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "remove": {
+    "message": "Rimuovi"
+  },
+  "removeOriginAria": {
+    "message": "Rimuovi $ORIGIN$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveFailed": {
+    "message": "Impossibile salvare."
+  },
+  "invalidOrigin": {
+    "message": "Inserisci un URL come https://example.com o http://localhost:5173"
+  },
+  "onlyHttp": {
+    "message": "Sono supportati solo siti http e https."
+  },
+  "permissionDenied": {
+    "message": "Chrome non ha concesso l'accesso a quel sito."
+  },
+  "badgeTools": {
+    "message": "Haven Agent Bridge: $TOOLS$ da $ORIGIN$",
+    "placeholders": {
+      "tools": {
+        "content": "$1"
+      },
+      "origin": {
+        "content": "$2"
+      }
+    }
+  },
+  "badgeNoTab": {
+    "message": "Haven Agent Bridge: nessuna scheda scelta"
+  },
+  "badgeNotRunning": {
+    "message": "Haven Agent Bridge: il bridge non è in esecuzione"
+  },
+  "clientsCount_one": {
+    "message": "$COUNT$ client MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clientsCount_many": {
+    "message": "$COUNT$ client MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clientsCount_other": {
+    "message": "$COUNT$ client MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_one": {
+    "message": "$COUNT$ strumento",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_many": {
+    "message": "$COUNT$ strumenti",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_other": {
+    "message": "$COUNT$ strumenti",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  }
+}

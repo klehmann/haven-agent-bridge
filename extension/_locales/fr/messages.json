@@ -1,0 +1,176 @@
+{
+  "extDescription": {
+    "message": "Relie les outils WebMCP d’un onglet choisi (Haven et autres sites autorisés) à des clients MCP comme Goose ou Claude Code."
+  },
+  "connecting": {
+    "message": "Connexion…"
+  },
+  "toolsSourceHeading": {
+    "message": "Les outils des clients MCP viennent de"
+  },
+  "targetsAria": {
+    "message": "Onglet pour les clients MCP"
+  },
+  "recordPayloads": {
+    "message": "Enregistrer les arguments et les réponses"
+  },
+  "debugGui": {
+    "message": "Interface de débogage"
+  },
+  "allowedSites": {
+    "message": "Sites autorisés"
+  },
+  "originInputAria": {
+    "message": "Origine à autoriser"
+  },
+  "allow": {
+    "message": "Autoriser"
+  },
+  "statusConnected": {
+    "message": "Connecté au bridge sur le port $PORT$ · $CLIENTS$",
+    "placeholders": {
+      "port": {
+        "content": "$1"
+      },
+      "clients": {
+        "content": "$2"
+      }
+    }
+  },
+  "statusNotRunning": {
+    "message": "Le bridge ne tourne pas. Démarrez votre client MCP ou exécutez : haven-agent-bridge daemon"
+  },
+  "choiceActiveTitle": {
+    "message": "L’onglet autorisé utilisé en dernier"
+  },
+  "choiceActiveNow": {
+    "message": "actuellement : $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceActiveFollows": {
+    "message": "suit vos changements d’onglet"
+  },
+  "choiceOriginTitle": {
+    "message": "N’importe quel onglet de $ORIGIN$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceOriginSub": {
+    "message": "celui utilisé en dernier"
+  },
+  "choiceConnected": {
+    "message": "connecté"
+  },
+  "polyfill": {
+    "message": "polyfill"
+  },
+  "noAllowedTab": {
+    "message": "Aucun onglet autorisé n’est ouvert."
+  },
+  "reload": {
+    "message": "Recharger"
+  },
+  "notConnectedYet": {
+    "message": "Pas encore connecté : $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "remove": {
+    "message": "Retirer"
+  },
+  "removeOriginAria": {
+    "message": "Retirer $ORIGIN$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveFailed": {
+    "message": "Impossible d’enregistrer."
+  },
+  "invalidOrigin": {
+    "message": "Saisissez une URL comme https://example.com ou http://localhost:5173"
+  },
+  "onlyHttp": {
+    "message": "Seuls les sites http et https sont pris en charge."
+  },
+  "permissionDenied": {
+    "message": "Chrome n’a pas accordé l’accès à ce site."
+  },
+  "badgeTools": {
+    "message": "Haven Agent Bridge : $TOOLS$ de $ORIGIN$",
+    "placeholders": {
+      "tools": {
+        "content": "$1"
+      },
+      "origin": {
+        "content": "$2"
+      }
+    }
+  },
+  "badgeNoTab": {
+    "message": "Haven Agent Bridge : aucun onglet choisi"
+  },
+  "badgeNotRunning": {
+    "message": "Haven Agent Bridge : le bridge ne tourne pas"
+  },
+  "clientsCount_one": {
+    "message": "$COUNT$ client MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clientsCount_many": {
+    "message": "$COUNT$ clients MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clientsCount_other": {
+    "message": "$COUNT$ clients MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_one": {
+    "message": "$COUNT$ outil",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_many": {
+    "message": "$COUNT$ outils",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_other": {
+    "message": "$COUNT$ outils",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  }
+}

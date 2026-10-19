@@ -1,0 +1,192 @@
+{
+  "extDescription": {
+    "message": "Łączy narzędzia WebMCP jednej wybranej karty (Haven i inne dozwolone witryny) z klientami MCP, takimi jak Goose czy Claude Code."
+  },
+  "connecting": {
+    "message": "Łączenie…"
+  },
+  "toolsSourceHeading": {
+    "message": "Narzędzia dla klientów MCP pochodzą z"
+  },
+  "targetsAria": {
+    "message": "Karta dla klientów MCP"
+  },
+  "recordPayloads": {
+    "message": "Zapisuj argumenty i odpowiedzi"
+  },
+  "debugGui": {
+    "message": "Widok debugowania"
+  },
+  "allowedSites": {
+    "message": "Dozwolone witryny"
+  },
+  "originInputAria": {
+    "message": "Origin do dopuszczenia"
+  },
+  "allow": {
+    "message": "Zezwól"
+  },
+  "statusConnected": {
+    "message": "Połączono z mostem na porcie $PORT$ · $CLIENTS$",
+    "placeholders": {
+      "port": {
+        "content": "$1"
+      },
+      "clients": {
+        "content": "$2"
+      }
+    }
+  },
+  "statusNotRunning": {
+    "message": "Most nie działa. Uruchom swojego klienta MCP albo wykonaj: haven-agent-bridge daemon"
+  },
+  "choiceActiveTitle": {
+    "message": "Ostatnio używana dozwolona karta"
+  },
+  "choiceActiveNow": {
+    "message": "teraz: $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceActiveFollows": {
+    "message": "podąża za przełączaniem kart"
+  },
+  "choiceOriginTitle": {
+    "message": "Dowolna karta w $ORIGIN$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceOriginSub": {
+    "message": "ostatnio używana"
+  },
+  "choiceConnected": {
+    "message": "połączona"
+  },
+  "polyfill": {
+    "message": "polyfill"
+  },
+  "noAllowedTab": {
+    "message": "Żadna dozwolona karta nie jest otwarta."
+  },
+  "reload": {
+    "message": "Odśwież"
+  },
+  "notConnectedYet": {
+    "message": "Jeszcze niepołączona: $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "remove": {
+    "message": "Usuń"
+  },
+  "removeOriginAria": {
+    "message": "Usuń $ORIGIN$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveFailed": {
+    "message": "Nie udało się zapisać."
+  },
+  "invalidOrigin": {
+    "message": "Wpisz adres URL, np. https://example.com lub http://localhost:5173"
+  },
+  "onlyHttp": {
+    "message": "Obsługiwane są tylko witryny http i https."
+  },
+  "permissionDenied": {
+    "message": "Chrome nie przyznał dostępu do tej witryny."
+  },
+  "badgeTools": {
+    "message": "Haven Agent Bridge: $TOOLS$ z $ORIGIN$",
+    "placeholders": {
+      "tools": {
+        "content": "$1"
+      },
+      "origin": {
+        "content": "$2"
+      }
+    }
+  },
+  "badgeNoTab": {
+    "message": "Haven Agent Bridge: nie wybrano karty"
+  },
+  "badgeNotRunning": {
+    "message": "Haven Agent Bridge: most nie działa"
+  },
+  "clientsCount_one": {
+    "message": "$COUNT$ klient MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clientsCount_few": {
+    "message": "$COUNT$ klienci MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clientsCount_many": {
+    "message": "$COUNT$ klientów MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clientsCount_other": {
+    "message": "$COUNT$ klienta MCP",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_one": {
+    "message": "$COUNT$ narzędzie",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_few": {
+    "message": "$COUNT$ narzędzia",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_many": {
+    "message": "$COUNT$ narzędzi",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_other": {
+    "message": "$COUNT$ narzędzia",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  }
+}

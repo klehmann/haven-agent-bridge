@@ -1,0 +1,160 @@
+{
+  "extDescription": {
+    "message": "Verbindet die WebMCP-Werkzeuge eines gewählten Tabs (Haven und andere erlaubte Websites) mit MCP-Clients wie Goose oder Claude Code."
+  },
+  "connecting": {
+    "message": "Verbinde…"
+  },
+  "toolsSourceHeading": {
+    "message": "Werkzeuge für MCP-Clients kommen aus"
+  },
+  "targetsAria": {
+    "message": "Tab für MCP-Clients"
+  },
+  "recordPayloads": {
+    "message": "Argumente und Antworten aufzeichnen"
+  },
+  "debugGui": {
+    "message": "Debug-Oberfläche"
+  },
+  "allowedSites": {
+    "message": "Erlaubte Websites"
+  },
+  "originInputAria": {
+    "message": "Zu erlaubender Origin"
+  },
+  "allow": {
+    "message": "Erlauben"
+  },
+  "statusConnected": {
+    "message": "Mit der Bridge auf Port $PORT$ verbunden · $CLIENTS$",
+    "placeholders": {
+      "port": {
+        "content": "$1"
+      },
+      "clients": {
+        "content": "$2"
+      }
+    }
+  },
+  "statusNotRunning": {
+    "message": "Bridge läuft nicht. Starte deinen MCP-Client oder führe aus: haven-agent-bridge daemon"
+  },
+  "choiceActiveTitle": {
+    "message": "Der erlaubte Tab, den ich zuletzt benutzt habe"
+  },
+  "choiceActiveNow": {
+    "message": "jetzt: $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceActiveFollows": {
+    "message": "folgt deinen Tab-Wechseln"
+  },
+  "choiceOriginTitle": {
+    "message": "Beliebiger Tab auf $ORIGIN$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceOriginSub": {
+    "message": "der zuletzt benutzte"
+  },
+  "choiceConnected": {
+    "message": "verbunden"
+  },
+  "polyfill": {
+    "message": "Polyfill"
+  },
+  "noAllowedTab": {
+    "message": "Kein erlaubter Tab ist offen."
+  },
+  "reload": {
+    "message": "Neu laden"
+  },
+  "notConnectedYet": {
+    "message": "Noch nicht verbunden: $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "remove": {
+    "message": "Entfernen"
+  },
+  "removeOriginAria": {
+    "message": "$ORIGIN$ entfernen",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveFailed": {
+    "message": "Speichern fehlgeschlagen."
+  },
+  "invalidOrigin": {
+    "message": "Gib eine URL wie https://example.com oder http://localhost:5173 ein"
+  },
+  "onlyHttp": {
+    "message": "Nur http- und https-Websites werden unterstützt."
+  },
+  "permissionDenied": {
+    "message": "Chrome hat den Zugriff auf diese Website nicht erlaubt."
+  },
+  "badgeTools": {
+    "message": "Haven Agent Bridge: $TOOLS$ von $ORIGIN$",
+    "placeholders": {
+      "tools": {
+        "content": "$1"
+      },
+      "origin": {
+        "content": "$2"
+      }
+    }
+  },
+  "badgeNoTab": {
+    "message": "Haven Agent Bridge: kein Tab gewählt"
+  },
+  "badgeNotRunning": {
+    "message": "Haven Agent Bridge: Bridge läuft nicht"
+  },
+  "clientsCount_one": {
+    "message": "$COUNT$ MCP-Client",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clientsCount_other": {
+    "message": "$COUNT$ MCP-Clients",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_one": {
+    "message": "$COUNT$ Werkzeug",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_other": {
+    "message": "$COUNT$ Werkzeuge",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  }
+}

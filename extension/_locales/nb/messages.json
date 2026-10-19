@@ -1,0 +1,160 @@
+{
+  "extDescription": {
+    "message": "Kobler WebMCP-verktøyene i én valgt fane (Haven og andre tillatte nettsteder) til MCP-klienter som Goose eller Claude Code."
+  },
+  "connecting": {
+    "message": "Kobler til…"
+  },
+  "toolsSourceHeading": {
+    "message": "Verktøy for MCP-klienter kommer fra"
+  },
+  "targetsAria": {
+    "message": "Fane for MCP-klienter"
+  },
+  "recordPayloads": {
+    "message": "Ta opp argumenter og svar"
+  },
+  "debugGui": {
+    "message": "Feilsøkingsvisning"
+  },
+  "allowedSites": {
+    "message": "Tillatte nettsteder"
+  },
+  "originInputAria": {
+    "message": "Opprinnelse som skal tillates"
+  },
+  "allow": {
+    "message": "Tillat"
+  },
+  "statusConnected": {
+    "message": "Koblet til broen på port $PORT$ · $CLIENTS$",
+    "placeholders": {
+      "port": {
+        "content": "$1"
+      },
+      "clients": {
+        "content": "$2"
+      }
+    }
+  },
+  "statusNotRunning": {
+    "message": "Broen kjører ikke. Start MCP-klienten din, eller kjør: haven-agent-bridge daemon"
+  },
+  "choiceActiveTitle": {
+    "message": "Den tillatte fanen jeg brukte sist"
+  },
+  "choiceActiveNow": {
+    "message": "nå: $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceActiveFollows": {
+    "message": "følger fanebyttene dine"
+  },
+  "choiceOriginTitle": {
+    "message": "Hvilken som helst fane på $ORIGIN$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "choiceOriginSub": {
+    "message": "den som ble brukt sist"
+  },
+  "choiceConnected": {
+    "message": "tilkoblet"
+  },
+  "polyfill": {
+    "message": "polyfill"
+  },
+  "noAllowedTab": {
+    "message": "Ingen tillatt fane er åpen."
+  },
+  "reload": {
+    "message": "Last inn på nytt"
+  },
+  "notConnectedYet": {
+    "message": "Ikke tilkoblet ennå: $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  },
+  "remove": {
+    "message": "Fjern"
+  },
+  "removeOriginAria": {
+    "message": "Fjern $ORIGIN$",
+    "placeholders": {
+      "origin": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveFailed": {
+    "message": "Kunne ikke lagre."
+  },
+  "invalidOrigin": {
+    "message": "Skriv inn en URL som https://example.com eller http://localhost:5173"
+  },
+  "onlyHttp": {
+    "message": "Bare http- og https-nettsteder støttes."
+  },
+  "permissionDenied": {
+    "message": "Chrome ga ikke tilgang til det nettstedet."
+  },
+  "badgeTools": {
+    "message": "Haven Agent Bridge: $TOOLS$ fra $ORIGIN$",
+    "placeholders": {
+      "tools": {
+        "content": "$1"
+      },
+      "origin": {
+        "content": "$2"
+      }
+    }
+  },
+  "badgeNoTab": {
+    "message": "Haven Agent Bridge: ingen fane valgt"
+  },
+  "badgeNotRunning": {
+    "message": "Haven Agent Bridge: broen kjører ikke"
+  },
+  "clientsCount_one": {
+    "message": "$COUNT$ MCP-klient",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clientsCount_other": {
+    "message": "$COUNT$ MCP-klienter",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_one": {
+    "message": "$COUNT$ verktøy",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toolsCount_other": {
+    "message": "$COUNT$ verktøy",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  }
+}
